@@ -1,0 +1,345 @@
+/* Container for the opened page content/editor below the buttons */
+.pageContentContainer {
+width: 100vw;
+max-width: 100vw;
+margin: 0;
+padding: 0 0 32px 0;
+box-sizing: border-box;
+background: #fff;
+border-radius: 0;
+box-shadow: none;
+}
+.deleteBtn {
+    border: none;
+    background: none;
+    font-size: 17px;
+    color: #e53935;
+    margin-left: 2px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0 2px;
+    cursor: pointer;
+    transition: color 0.2s, opacity 0.2s;
+    opacity: 0.85;
+    vertical-align: middle;
+}
+.deleteBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.deleteBtn:hover:not(:disabled) {
+    color: #b71c1c;
+    opacity: 1;
+}
+/* EditCareers.module.css - Modern, clean, responsive design for EditCareers page */
+
+/* Make root take full width and center content */
+.editCareersRoot {
+    min-height: 100vh;
+    width: 100vw;
+    background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    overflow-x: hidden;
+}
+
+.editCareersContainer {
+    width: 100vw;
+    max-width: 100vw;
+    margin: 0;
+    background: #fff;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 24px 0 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 100vh;
+    justify-content: flex-start;
+}
+
+.title {
+    text-align: center;
+    font-weight: 800;
+    font-size: clamp(2rem, 5vw, 2.7rem);
+    color: #1a237e;
+    margin-bottom: 32px;
+    margin-top: 0;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 8px #e0e7ef;
+}
+
+.careerSelectWrap {
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.careerSelectLabel {
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #283593;
+}
+
+.careerSelect {
+    width: 100%;
+    padding: 12px 18px;
+    font-size: 17px;
+    border-radius: 8px;
+    border: 1.5px solid #cbd5e1;
+    background: #f1f5f9;
+    outline: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    transition: border 0.2s;
+}
+
+.careerSelect:focus {
+    border: 1.5px solid #1976d2;
+}
+
+.pagesHeader {
+    font-weight: 700;
+    font-size: 22px;
+    color: #1976d2;
+    margin-bottom: 18px;
+    text-align: center;
+}
+
+.pagesList {
+    list-style: none;
+    padding: 0 24px;
+    margin: 0 0 24px 0;
+    width: 100vw;
+    min-width: 0;
+    max-width: 100vw;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f8fafc;
+}
+.pageBtn {
+    background: #e3eafc;
+    color: #283593;
+    border: 1.5px solid #b6c6f5;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: 600;
+    padding: 12px 28px;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s, border 0.18s;
+    outline: none;
+    margin: 0;
+    box-shadow: 0 1px 4px rgba(44,62,80,0.04);
+    white-space: nowrap;
+}
+.pageBtn:hover, .pageBtn.selected {
+    background: #1976d2;
+    color: #fff;
+    border: 1.5px solid #1976d2;
+}
+
+.pagesList::-webkit-scrollbar {
+    width: 8px;
+    background: #f8fafc;
+}
+
+.pagesList::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 8px;
+}
+
+/* Remove .pageCard width restrictions, not used for new layout */
+
+.pageCard:hover {
+    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.08);
+}
+
+.pageCardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 18px;
+    color: #283593;
+    border-radius: 12px 12px 0 0;
+    background: #e3eafc;
+}
+
+.expandBtn {
+    border: none;
+    background: none;
+    font-size: 26px;
+    color: #1976d2;
+    cursor: pointer;
+    font-weight: 700;
+    transition: color 0.2s;
+}
+
+.expandBtn:active {
+    color: #0d47a1;
+}
+
+.pageCardContent {
+    padding: 22px 22px 18px 22px;
+    color: #374151;
+    font-size: 16px;
+    background: #fff;
+    border-radius: 0 0 12px 12px;
+    border-top: 1px solid #e2e8f0;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.headingBlock {
+    margin-bottom: 20px;
+}
+
+.headingRow {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 700;
+    color: #1976d2;
+    font-size: 17px;
+    padding: 4px 0;
+    transition: color 0.2s;
+}
+
+.headingRow:hover {
+    color: #0d47a1;
+}
+
+.headingExpandBtn {
+    border: none;
+    background: none;
+    font-size: 20px;
+    color: #1976d2;
+    margin-left: 8px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.headingExpandBtn:active {
+    color: #0d47a1;
+}
+
+.editArea {
+    margin-left: 0;
+    margin-top: 10px;
+    max-width: 100vw;
+    width: 100vw;
+    /* min-height: 300px; */
+    word-break: break-word;
+    padding-bottom: 10px;
+    font-weight: 400;
+    color: #374151;
+    font-size: 15.5px;
+    border-bottom: 1px solid #e5e7eb;
+    transition: all 0.2s cubic-bezier(.4, 0, .2, 1);
+}
+
+.textarea {
+    width: 100%;
+    /* min-height: 3 rem; */
+    font-size: 15.5px;
+    font-family: inherit;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    background: #f8fafc;
+    resize: vertical;
+    transition: border 0.2s;
+}
+
+.textarea:focus {
+    border: 1.5px solid #1976d2;
+}
+
+.actionBtns {
+    display: flex;
+    gap: 12px;
+}
+
+.saveBtn {
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 7px 22px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    opacity: 1;
+    transition: opacity 0.2s, background 0.2s;
+}
+
+.saveBtn:disabled {
+    opacity: 0.7;
+    background: #90caf9;
+    cursor: not-allowed;
+}
+
+.cancelBtn {
+    background: #e2e8f0;
+    color: #374151;
+    border: none;
+    border-radius: 5px;
+    padding: 7px 22px;
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+    opacity: 1;
+    transition: opacity 0.2s, background 0.2s;
+}
+
+.cancelBtn:disabled {
+    opacity: 0.7;
+    background: #e3eafc;
+    cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+    .editCareersContainer {
+        width: 100vw;
+        max-width: 100vw;
+        padding: 8px 0 0 0;
+    }
+    .pagesList {
+        max-width: 100vw;
+        padding: 0 4px;
+    }
+    .pageContentContainer {
+        padding: 0 0 18px 0;
+        border-radius: 0;
+        width: 100vw;
+        max-width: 100vw;
+    }
+}
