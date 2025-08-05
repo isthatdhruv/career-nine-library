@@ -1,0 +1,17 @@
+{
+  "functions": [
+    {
+      "source": ".",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "test-image-generation.js",
+        "README.md",
+        "IMAGE_GENERATION_README.md"
+      ]
+    }
+  ]
+}

@@ -22,26 +22,6 @@ function AllCareers() {
     }
     fetchCareers();
   }, []);
-  function parseLinks(links) {
-  // Parse links into a nested structure: domain > section > career
-  const tree = {};
-  links.forEach(link => {
-    try {
-      const url = new URL(link.pageUrl);
-      const domain = "www.career-9.com";
-      const pathParts = url.pathname.replace(/^\//, '').split('/');
-      const section = pathParts[0] || 'root';
-      const career = pathParts[1] || 'root';
-      if (!tree[domain]) tree[domain] = {};
-      if (!tree[domain][section]) tree[domain][section] = {};
-      if (!tree[domain][section][career]) tree[domain][section][career] = [];
-      tree[domain][section][career].push(link);
-    } catch (e) {
-      // skip invalid URLs
-    }
-  });
-  return tree;
-}
 
 // Helper to extract only the /careerlibrary/... path from the URL
 function getCareerPath(url) {

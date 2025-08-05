@@ -280,29 +280,106 @@ With the increasing demand for skilled professionals in this area, ${career} rep
     return `Comprehensive information about ${career} career opportunities, requirements, and growth prospects. This field offers excellent potential for professional development and meaningful work in today's evolving job market.`;
   }
 
-  // Image generation methods
-  async generateImage(prompt, options = {}) {
+    // Image generation methods
+  async generateImage(promptOrOptions, options = {}) {
     if (!this.hasOpenAI) {
       throw new Error('OpenAI API not configured');
     }
 
     try {
-      const response = await this.openai.images.generate({
-        model: "dall-e-3",
-        prompt: prompt,
-        n: 1,
-        size: options.size || "1200x600",
-        quality: options.quality || "standard",
-        style: options.style || "vivid"
-      });
+      // Handle both calling patterns:
+      // generateImage(prompt, options) or generateImage({prompt, size, quality, style, model})
+      let prompt, finalOptions;
+      if (typeof promptOrOptions === 'string') {
+        prompt = promptOrOptions;
+        finalOptions = options;
+      } else {
+        // Called with object containing all parameters
+        prompt = promptOrOptions.prompt;
+        finalOptions = promptOrOptions;
+      }
 
-      return {
-        imageUrl: response.data[0].url,
-        revisedPrompt: response.data[0].revised_prompt,
-        isAIGenerated: true
-      };
+      // Default to GPT-image-1 if no model specified
+      const model = finalOptions.model || 'gpt-image-1';
+      let imageSize = finalOptions.size || '1024x1024';
+      
+      console.log(`🤖 Using model: ${model} with size: ${imageSize}`);
+      
+      // Handle different models with their specific parameters
+      if (model === 'gpt-image-1') {
+        // GPT-image-1 has limited size support: '1024x1024', '1024x1536', '1536x1024', 'auto'
+        // Map requested sizes to supported sizes
+        if (imageSize === '1200x600' || imageSize === '1920x1080' || imageSize.includes('x')) {
+          // For banner/landscape requests, use 1536x1024 (closest to 2:1 ratio)
+          const [width, height] = imageSize.split('x').map(Number);
+          if (width > height) {
+            imageSize = '1536x1024'; // Landscape format
+          } else if (height > width) {
+            imageSize = '1024x1536'; // Portrait format
+          } else {
+            imageSize = '1024x1024'; // Square format
+          }
+        }
+        
+        // Ensure we only use supported sizes for GPT-image-1
+        const supportedSizes = ['1024x1024', '1024x1536', '1536x1024', 'auto'];
+        if (!supportedSizes.includes(imageSize)) {
+          imageSize = '1536x1024'; // Default to landscape for banner-like requests
+        }
+        
+        const response = await this.openai.images.generate({
+          model: "gpt-image-1",
+          prompt: prompt,
+          n: 1,
+          size: imageSize
+          // Note: GPT-image-1 doesn't support quality and style parameters
+        });
+
+        return {
+          imageUrl: response.data[0].url,
+          revisedPrompt: response.data[0].revised_prompt || prompt,
+          isAIGenerated: true
+        };
+        
+      } else if (model === 'dall-e-3') {
+        // DALL-E 3 supports: '1024x1024', '1024x1792', '1792x1024'
+        // Map requested sizes to supported sizes
+        if (imageSize === '1200x600' || imageSize === '1536x1024' || imageSize.includes('x')) {
+          const [width, height] = imageSize.split('x').map(Number);
+          if (width > height) {
+            imageSize = '1792x1024'; // Landscape format
+          } else if (height > width) {
+            imageSize = '1024x1792'; // Portrait format
+          } else {
+            imageSize = '1024x1024'; // Square format
+          }
+        }
+        
+        // Ensure we only use supported sizes for DALL-E 3
+        const supportedSizes = ['1024x1024', '1024x1792', '1792x1024'];
+        if (!supportedSizes.includes(imageSize)) {
+          imageSize = '1792x1024'; // Default to landscape for banner-like requests
+        }
+        
+        const response = await this.openai.images.generate({
+          model: "dall-e-3",
+          prompt: prompt,
+          n: 1,
+          size: imageSize,
+          quality: finalOptions.quality || 'standard',
+          style: finalOptions.style || 'natural'
+        });
+
+        return {
+          imageUrl: response.data[0].url,
+          revisedPrompt: response.data[0].revised_prompt || prompt,
+          isAIGenerated: true
+        };
+      } else {
+        throw new Error(`Unsupported model: ${model}. Supported models are: gpt-image-1, dall-e-3`);
+      }
     } catch (error) {
-      console.error('DALL-E API Error:', error);
+      console.error('Image Generation API Error:', error);
       throw error;
     }
   }

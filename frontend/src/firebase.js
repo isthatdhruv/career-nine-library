@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBjQyJkX9K0IATW7hnIJ-CXiWhMUsQWOLM",
@@ -18,8 +19,9 @@ const app = initializeApp(firebaseConfig);
 // const db = getFirestore(app);
 
 const db = getFirestore(app);
-// if (process.env.NODE_ENV === "development") {
-//   connectFirestoreEmulator(db, "127.0.0.1", 8080);
-// }
+const storage = getStorage(app);
+if (process.env.NODE_ENV === "development") {
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+}
 
-export { app, db };
+export { app, db, storage };

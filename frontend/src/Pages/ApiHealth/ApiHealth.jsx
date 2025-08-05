@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ApiHealth.css';
+import { getApiUrl, API_URLS } from '../../config/api';
 
 const ApiHealth = () => {
   const [healthData, setHealthData] = useState(null);
@@ -12,11 +13,20 @@ const ApiHealth = () => {
     try {
       setLoading(true);
       
+      const aiHealthUrl = getApiUrl('/api/ai/health');
+      const mainHealthUrl = getApiUrl('/api/health');
+      
+      console.log('🔍 Fetching health data from:', {
+        aiService: aiHealthUrl,
+        mainBackend: mainHealthUrl,
+        environment: process.env.NODE_ENV === 'production' || window.location.hostname !== 'localhost' ? 'Production' : 'Development'
+      });
+      
       // Fetch health data from backend servers
       // Main backend is optional (only needed for browser extension scraping)
       const [aiHealthResponse, mainHealthResponse] = await Promise.allSettled([
-        fetch('http://localhost:3002/api/ai/health'),
-        fetch('http://localhost:3003/api/health')
+        fetch(aiHealthUrl),
+        fetch(mainHealthUrl)
       ]);
 
       const healthData = {
@@ -29,12 +39,16 @@ const ApiHealth = () => {
         const aiHealth = await aiHealthResponse.value.json();
         healthData.services.aiService = {
           status: 'healthy',
+          url: aiHealthUrl,
           ...aiHealth
         };
       } else {
+        const errorDetails = aiHealthResponse.reason?.message || 
+                           (aiHealthResponse.value ? `HTTP ${aiHealthResponse.value.status}: ${aiHealthResponse.value.statusText}` : 'Service unavailable');
         healthData.services.aiService = {
           status: 'error',
-          error: aiHealthResponse.reason?.message || 'Service unavailable'
+          url: aiHealthUrl,
+          error: errorDetails
         };
       }
 
@@ -43,11 +57,13 @@ const ApiHealth = () => {
         const mainHealth = await mainHealthResponse.value.json();
         healthData.services.mainBackend = {
           status: 'healthy',
+          url: mainHealthUrl,
           ...mainHealth
         };
       } else {
         healthData.services.mainBackend = {
           status: 'optional',
+          url: mainHealthUrl,
           error: 'Service not running (only needed for browser extension scraping)',
           note: 'This service is optional and only required when using the browser extension to scrape new career pages'
         };
@@ -55,7 +71,7 @@ const ApiHealth = () => {
 
       // Fetch API usage stats
       try {
-        const statsResponse = await fetch('http://localhost:3002/api/ai/stats');
+        const statsResponse = await fetch(getApiUrl('/api/ai/stats'));
         if (statsResponse.ok) {
           const stats = await statsResponse.json();
           healthData.apiStats = stats;
@@ -92,13 +108,13 @@ const ApiHealth = () => {
     return new Date(timestamp).toLocaleString();
   };
 
-  const formatBytes = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
+  // const formatBytes = (bytes) => {
+  //   if (bytes === 0) return '0 Bytes';
+  //   const k = 1024;
+  //   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  //   const i = Math.floor(Math.log(bytes) / Math.log(k));
+  //   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  // };
 
   const getStatusBadge = (status) => {
     let badgeClass = 'status-error';
@@ -121,7 +137,7 @@ const ApiHealth = () => {
   return (
     <div className="api-health-page">
       <header className="health-header">
-        <h1>🏥 API Health Dashboard</h1>
+        <h1>API Health Dashboard</h1>
         <div className="health-controls">
           <div className="refresh-controls">
             <label>
@@ -175,6 +191,9 @@ const ApiHealth = () => {
                   {getStatusBadge(serviceData.status)}
                 </div>
                 <div className="service-details">
+                  {serviceData.url && (
+                    <p><strong>URL:</strong> <code>{serviceData.url}</code></p>
+                  )}
                   {serviceData.status === 'healthy' ? (
                     <>
                       <p><strong>Service:</strong> {serviceData.service || 'Backend API'}</p>
@@ -289,8 +308,12 @@ const ApiHealth = () => {
               </div>
               <div className="info-card">
                 <h4>🔗 Endpoints</h4>
-                <p>AI Service: http://localhost:3002 (Required)</p>
-                <p>Main Backend: http://localhost:3003 (Optional - Browser Extension Only)</p>
+                <p>AI Service: {API_URLS.AI_SERVICE_URL} (Required)</p>
+                <p>Main Backend: {API_URLS.MAIN_BACKEND_URL} (Optional - Browser Extension Only)</p>
+                <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+                  <p>Environment: {process.env.NODE_ENV === 'production' || window.location.hostname !== 'localhost' ? 'Production' : 'Development'}</p>
+                  <p>Hostname: {window.location.hostname}</p>
+                </div>
               </div>
               <div className="info-card">
                 <h4>📱 Browser</h4>

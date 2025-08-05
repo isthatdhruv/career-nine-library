@@ -13,7 +13,7 @@ const aiRoutes = require('./routes/ai');
 
 // Create Express app
 const app = express();
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.DEV_PORT || 3002;
 
 // Security middleware
 app.use(helmet({

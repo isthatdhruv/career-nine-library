@@ -1,198 +1,131 @@
-# AI Backend Server
+# AI Backend - Firebase Functions
 
-A dedicated backend server for AI-powered content enhancement in the career content management system.
+This directory contains both the Express.js development server and Firebase Functions for production deployment.
 
-## Features
+## 🚀 Development Mode
 
-- 🤖 **AI Content Enhancement**: OpenAI-powered content improvement
-- 🔄 **Fallback System**: Smart fallback when AI service is unavailable
-- 🛡️ **Security**: Rate limiting, CORS, and security headers
-- 📊 **Health Monitoring**: Health check endpoints
-- 🚀 **Performance**: Optimized for fast response times
-- 📝 **Comprehensive Logging**: Detailed request and error logging
+Run the local Express.js server for development:
 
-## API Endpoints
-
-### Health Check
-```
-GET /health
-```
-Returns server status and configuration information.
-
-### Content Enhancement
-```
-POST /api/enhance-content
-```
-Enhance individual content fields with AI.
-
-**Request Body:**
-```json
-{
-  "content": "Content to enhance",
-  "fieldType": "text|title|summary|array|object|complex",
-  "context": {
-    "career": "Career name",
-    "heading": "Field heading",
-    "parentHeading": "Parent section"
-  }
-}
+```bash
+npm install
+npm start
+# or
+npm run dev  # with nodemon for auto-restart
 ```
 
-### Bulk Enhancement
-```
-POST /api/enhance-bulk
-```
-Enhance multiple content fields in a single request.
+Server will run on `http://localhost:3002`
 
-**Request Body:**
-```json
-{
-  "requests": [
-    {
-      "content": "Content 1",
-      "fieldType": "text",
-      "context": { ... }
-    },
-    {
-      "content": "Content 2", 
-      "fieldType": "summary",
-      "context": { ... }
-    }
-  ]
-}
-```
+## ☁️ Production Deployment (Firebase Functions)
 
-### Enhancement Types
-```
-GET /api/enhancement-types
-```
-Get available field types and headings for enhancement.
+### Prerequisites
 
-## Setup
-
-1. **Install Dependencies**
+1. **Firebase CLI installed**:
    ```bash
-   npm install
+   npm install -g firebase-tools
    ```
 
-2. **Environment Configuration**
+2. **Logged into Firebase**:
    ```bash
-   cp .env.example .env
-   ```
-   
-   Update `.env` with your configuration:
-   ```env
-   OPENAI_API_KEY=your_openai_api_key_here
-   PORT=3001
-   NODE_ENV=development
-   FRONTEND_URL=http://localhost:3000
+   firebase login
    ```
 
-3. **Start Server**
-   ```bash
-   # Development
-   npm run dev
-   
-   # Production
-   npm start
-   ```
+3. **Project configured**: Make sure you're in the correct Firebase project (`career-library`)
 
 ## Configuration
 
-### Environment Variables
-
-- `OPENAI_API_KEY`: Your OpenAI API key
-- `PORT`: Server port (default: 3001)
-- `NODE_ENV`: Environment (development/production)
-- `FRONTEND_URL`: Frontend application URL for CORS
-- `OPENAI_MODEL`: OpenAI model to use (default: gpt-3.5-turbo)
-- `OPENAI_MAX_TOKENS`: Maximum tokens per request (default: 1500)
-- `OPENAI_TEMPERATURE`: AI creativity level (default: 0.7)
-
-### Rate Limiting
-
-- General API: 100 requests per 15 minutes
-- AI Enhancement: 50 requests per 15 minutes  
-- Bulk Operations: 10 requests per 15 minutes
-
-## AI Enhancement Types
-
-### Field Types
-- **text**: General text content
-- **title**: Page titles and headings
-- **summary**: Career summaries and overviews
-- **array**: Lists and arrays of information
-- **object**: Structured data objects
-- **complex**: Complex nested structures
-
-### Career Headings
-- title
-- summary
-- how to become
-- career-opportunities
-- Important Facts
-- leading institutes
-- entrance exam
-- work description
-- pros and cons
-
-## Error Handling
-
-The server includes comprehensive error handling for:
-- Rate limiting violations
-- CORS errors
-- OpenAI API failures
-- Validation errors
-- Network timeouts
-
-When OpenAI is unavailable, the system automatically falls back to intelligent template-based enhancement.
-
-## Security Features
-
-- **Helmet**: Security headers
-- **CORS**: Cross-origin request protection
-- **Rate Limiting**: Prevents abuse
-- **Input Validation**: Request validation
-- **Error Sanitization**: Safe error responses
-
-## Monitoring
-
-Health check endpoint provides:
-- Server status
-- Uptime information
-- Environment details
-- OpenAI configuration status
-
-## Integration
-
-This server is designed to work with the career content management frontend. Update your frontend's AI service calls to point to:
-
-```javascript
-const API_BASE_URL = 'http://localhost:3001/api';
-```
-
-## Development
+### Set OpenAI API Key (Required for AI features)
 
 ```bash
-# Install dependencies
-npm install
-
-# Start development server with auto-reload
-npm run dev
-
-# Run in production mode
-npm start
+firebase functions:config:set openai.api_key="your_openai_api_key_here"
 ```
 
-## Production Deployment
+### Optional Configuration
 
-1. Set `NODE_ENV=production`
-2. Configure production OpenAI API key
-3. Set appropriate CORS origins
-4. Configure reverse proxy (nginx/Apache)
-5. Set up process manager (PM2)
-6. Configure monitoring and logging
+```bash
+firebase functions:config:set openai.model="gpt-3.5-turbo"
+firebase functions:config:set openai.max_tokens="1500"
+firebase functions:config:set openai.temperature="0.7"
+```
 
-## License
+### View Current Configuration
 
-MIT License
+```bash
+firebase functions:config:get
+```
+
+## Local Development
+
+1. **Install dependencies**:
+   ```bash
+   cd functions
+   npm install
+   ```
+
+2. **Download config for local development**:
+   ```bash
+   firebase functions:config:get > .runtimeconfig.json
+   ```
+
+3. **Start emulators**:
+   ```bash
+   firebase emulators:start --only functions
+   ```
+
+## Deployment
+
+### Deploy Functions Only
+
+```bash
+firebase deploy --only functions
+```
+
+### Deploy Everything (Functions + Hosting)
+
+```bash
+firebase deploy
+```
+
+## API Endpoints
+
+Once deployed, your API will be available at:
+- Base URL: `https://us-central1-career-library.cloudfunctions.net/api`
+- Health: `GET /api/ai/health`
+- Stats: `GET /api/ai/stats`
+- Enhance: `POST /api/ai/enhance`
+- Generate Image: `POST /api/ai/generate-image`
+- Reset Stats: `POST /api/ai/stats/reset`
+
+## Frontend Configuration
+
+After deployment, update your frontend to use the production API URLs:
+
+Replace `http://localhost:3002` with `https://us-central1-career-library.cloudfunctions.net` in your frontend code.
+
+## Troubleshooting
+
+1. **Check function logs**:
+   ```bash
+   firebase functions:log
+   ```
+
+2. **View specific function logs**:
+   ```bash
+   firebase functions:log --only api
+   ```
+
+3. **Check configuration**:
+   ```bash
+   firebase functions:config:get
+   ```
+
+4. **Clear and reset configuration**:
+   ```bash
+   firebase functions:config:unset openai
+   firebase functions:config:set openai.api_key="new_key"
+   ```
+
+## Notes
+
+- The API will work without OpenAI configuration (fallback mode)
+- CORS is configured for both development and production domains
+- All sensitive data should be configured via Firebase Functions config, not environment files

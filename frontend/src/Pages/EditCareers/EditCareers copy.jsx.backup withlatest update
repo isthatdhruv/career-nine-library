@@ -1,13 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
-import { db, storage } from '../../firebase';
+import { db } from '../../firebase';
 import { collection, getDocs, doc, updateDoc, setDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getApiUrl } from '../../config/api';
-import ImageGenerationModal from '../../components/ImageGenerationModal';
-import ProductionDebugger from '../../components/ProductionDebugger';
 import styles from './EditCareers.module.css';
-import { useNavigate, useLocation } from 'react-router-dom';
 
 // AI Enhancement Modal Component
 const AIEnhancementModal = ({ isOpen, onClose, originalContent, onApply, fieldPath, careerTitle }) => {
@@ -942,16 +938,8 @@ const NestedEditor = ({ value, onChange, isTopLevel = false, parentHeading = '',
 };
 
 const EditCareers = () => {
-  // Navigation hooks
-  const navigate = useNavigate();
-  const location = useLocation();
-  
   // AI Modal state
   const [aiModal, setAiModal] = useState({ isOpen: false, content: '', fieldPath: '', onApply: null });
-
-  // Image Generation Modal state
-  const [imageModal, setImageModal] = useState({ isOpen: false });
-  const [bannerImages, setBannerImages] = useState({}); // Store banner images by page ID
 
   // Default headings for a new page
   const defaultHeadings = [
@@ -1026,66 +1014,6 @@ const EditCareers = () => {
       fieldPath: path,
       onApply
     });
-  };
-
-  // Open image generation modal
-  const openImageModal = () => {
-    setImageModal({ isOpen: true });
-  };
-
-  // Handle image selection from modal
-  const handleImageSelect = async (imageUrl, imageFile) => {
-    if (!selectedPage) return;
-
-    try {
-      let finalImageUrl = imageUrl;
-
-      // If it's an uploaded file, upload to Firebase Storage
-      if (imageFile) {
-        const imageRef = ref(storage, `career-banners/${selectedPage.id}-${Date.now()}.${imageFile.name.split('.').pop()}`);
-        const uploadResult = await uploadBytes(imageRef, imageFile);
-        finalImageUrl = await getDownloadURL(uploadResult.ref);
-      }
-      // If it's a generated image (URL), we might want to download and re-upload for consistency
-      else if (imageUrl && imageUrl.startsWith('http')) {
-        // For generated images, we can store the URL directly or download and re-upload
-        // For now, we'll store the URL directly but in production you might want to download and re-upload
-        finalImageUrl = imageUrl;
-      }
-
-      // Store the image URL in local state (will be saved when page is saved)
-      setBannerImages(prev => ({
-        ...prev,
-        [selectedPage.id]: finalImageUrl
-      }));
-
-      // If this is an existing page, update the database immediately
-      if (!selectedPage.id.startsWith('new_')) {
-        const pageDoc = doc(db, 'careerPages', selectedPage.id);
-        await updateDoc(pageDoc, {
-          bannerImage: finalImageUrl,
-          lastModified: new Date().toISOString()
-        });
-
-        // Update local page state
-        setPages(prev => prev.map(p =>
-          p.id === selectedPage.id
-            ? { ...p, bannerImage: finalImageUrl, lastModified: new Date().toISOString() }
-            : p
-        ));
-        setCareerPages(prev => prev.map(p =>
-          p.id === selectedPage.id
-            ? { ...p, bannerImage: finalImageUrl, lastModified: new Date().toISOString() }
-            : p
-        ));
-
-        alert('✅ Banner image saved successfully!');
-      }
-
-    } catch (error) {
-      console.error('Error saving banner image:', error);
-      alert('❌ Failed to save banner image: ' + error.message);
-    }
   };
 
   // Add a new page for the selected career (local only until saved)
@@ -1213,19 +1141,6 @@ const EditCareers = () => {
     setSelectedPageId(tempId);
     setEditState(prev => ({ ...prev, [tempId]: newFields }));
     setOriginalState(prev => ({ ...prev, [tempId]: newFields }));
-
-    // Save to savedUrls collection
-    try {
-      const fsDoc = doc;
-      const savedUrlsCol = collection(db, 'savedUrls');
-      const urlDoc = fsDoc(savedUrlsCol, pageNameSlug);
-      await setDoc(urlDoc, {
-        pageUrl,
-        timestamp: new Date().toISOString()
-      });
-    } catch (e) {
-      alert('Failed to save page URL: ' + e.message);
-    }
   };
   const [careers, setCareers] = useState([]);
   const [selectedCareer, setSelectedCareer] = useState('');
@@ -1308,76 +1223,6 @@ const EditCareers = () => {
     });
     setOriginalState(orig);
   }, [selectedCareer, careerPages, showHiddenPages]);
-
-  // Handle navigation from preview page with selected career
-  useEffect(() => {
-    if (location.state?.selectedCareer && careers.length > 0 && careerPages.length > 0) {
-      const pageSlug = location.state.selectedCareer;
-      
-      // Find the page first
-      const targetPage = careerPages.find(page => page.id === pageSlug);
-      
-      if (targetPage) {
-        // Extract career category from the page's URL
-        let careerCategory = null;
-        
-        if (targetPage.pageUrl) {
-          try {
-            const url = new URL(targetPage.pageUrl);
-            const pathParts = url.pathname.replace(/^\//, '').split('/');
-            const clIdx = pathParts.findIndex(p => p === 'careerlibrary');
-            if (clIdx !== -1 && pathParts[clIdx + 1]) {
-              careerCategory = pathParts[clIdx + 1]; // This should be the main category like 'design'
-            }
-          } catch (e) {
-            console.error('Error parsing URL:', e);
-          }
-        }
-        
-        // If we found a career category from URL, look for it in careers list
-        if (careerCategory) {
-          const matchingCareer = careers.find(career => 
-            career.toLowerCase().replace(/\s+/g, '-') === careerCategory ||
-            career.toLowerCase() === careerCategory ||
-            careerCategory.includes(career.toLowerCase().replace(/\s+/g, '-')) ||
-            career.toLowerCase().includes(careerCategory)
-          );
-          
-          if (matchingCareer) {
-            setSelectedCareer(matchingCareer);
-            
-            // Wait for the pages to be filtered and then select the specific page
-            setTimeout(() => {
-              setSelectedPageId(pageSlug);
-              // Reset all sections to collapsed when switching from preview
-              const newCollapsed = {};
-              defaultHeadings.forEach(heading => {
-                newCollapsed[heading] = true;
-              });
-              setCollapsedHeadings(newCollapsed);
-            }, 100);
-          }
-        }
-        
-        // Fallback: if no career category found from URL, try to find by page.career field
-        if (!careerCategory && targetPage.career && careers.includes(targetPage.career)) {
-          setSelectedCareer(targetPage.career);
-          setTimeout(() => {
-            setSelectedPageId(pageSlug);
-            // Reset all sections to collapsed when switching from preview
-            const newCollapsed = {};
-            defaultHeadings.forEach(heading => {
-              newCollapsed[heading] = true;
-            });
-            setCollapsedHeadings(newCollapsed);
-          }, 100);
-        }
-      }
-      
-      // Clear the location state to prevent re-selection on subsequent renders
-      window.history.replaceState({}, document.title);
-    }
-  }, [location.state, careers, careerPages]);
 
   // Check if there are any hidden pages for the selected career
   const hasHiddenPages = careerPages.some(page => {
@@ -1724,82 +1569,6 @@ const EditCareers = () => {
                     </div>
                   )}
                 </div>
-
-                {/* Action Buttons */}
-                <div style={{ marginBottom: 28 }}>
-                  {/* Generate Banner Image Button */}
-                  <button
-                    onClick={openImageModal}
-                    style={{
-                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: 8,
-                      padding: '12px 24px',
-                      fontWeight: 600,
-                      fontSize: 16,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      boxShadow: '0 2px 8px 0 rgba(245,158,11,0.2)',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={e => {
-                      e.target.style.transform = 'translateY(-1px)';
-                      e.target.style.boxShadow = '0 4px 12px 0 rgba(245,158,11,0.3)';
-                    }}
-                    onMouseLeave={e => {
-                      e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = '0 2px 8px 0 rgba(245,158,11,0.2)';
-                    }}
-                  >
-                    🎨 Generate Banner Image
-                  </button>
-                </div>
-
-                {/* Show current banner image if exists */}
-                {(bannerImages[selectedPage.id] || selectedPage.bannerImage) && (
-                    <div style={{
-                      marginTop: 16,
-                      padding: 16,
-                      background: '#fff',
-                      borderRadius: 8,
-                      border: '1px solid #e5e7eb',
-                      boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1)',
-                      marginBottom: 28
-                    }}>
-                      <h4 style={{ margin: '0 0 12px 0', fontSize: 14, fontWeight: 600, color: '#374151' }}>
-                        Current Banner Image
-                      </h4>
-                      <div style={{
-                        width: '1536px',
-                        height: '1024px',
-                        maxWidth: '100%',
-                        border: '1px solid #d1d5db',
-                        borderRadius: 6,
-                        overflow: 'hidden',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: '#f3f4f6',
-                        transform: 'scale(0.26)', // Scale down to fit in the UI (works for both 1536x1024 and 1792x1024)
-                        transformOrigin: 'top left',
-                        marginBottom: '-760px' // Adjust for the scaled-down size
-                      }}>
-                        <img
-                          src={bannerImages[selectedPage.id] || selectedPage.bannerImage}
-                          alt="Current banner"
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover' // Crop the image to fit the aspect ratio
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
                 {defaultHeadings.map(heading => (
                   <div key={heading} style={{ 
                     marginBottom: 16, 
@@ -1998,64 +1767,10 @@ const EditCareers = () => {
                       }
                     }}
                   >
-                    {deleting[selectedPage.id]?.__page
-                      ? (selectedPage.isActive !== false ? 'Deleting...' : 'Restoring...')
+                    {deleting[selectedPage.id]?.__page 
+                      ? (selectedPage.isActive !== false ? 'Deleting...' : 'Restoring...') 
                       : (selectedPage.isActive !== false ? 'Delete' : 'Restore')
                     }
-                  </button>
-                  {/* Enhanced Preview Button */}
-                  <button
-                    onClick={() => {
-                      // Get current state of the page (edited or original)
-                      const currentPageData = {
-                        ...selectedPage,
-                        ...(editState[selectedPage.id] ? Object.fromEntries(
-                          Object.entries(editState[selectedPage.id]).map(([key, value]) => {
-                            if (typeof selectedPage[key] !== 'string' && value) {
-                              try {
-                                return [key, JSON.parse(value)];
-                              } catch {
-                                return [key, value];
-                              }
-                            }
-                            return [key, value];
-                          })
-                        ) : {}),
-                        ...(bannerImages[selectedPage.id] && { bannerImage: bannerImages[selectedPage.id] })
-                      };
-                      
-                      // Store the data in sessionStorage for the preview page
-                      sessionStorage.setItem('previewCareerData', JSON.stringify(currentPageData));
-                      
-                      // Navigate to preview page
-                      navigate(`/preview-career/${selectedPage.id}`);
-                    }}
-                    style={{
-                      background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: 8,
-                      padding: '12px 24px',
-                      fontWeight: 600,
-                      fontSize: 16,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      boxShadow: '0 2px 8px 0 rgba(99,102,241,0.2)',
-                      transition: 'all 0.2s ease',
-                      marginLeft: 8
-                    }}
-                    onMouseEnter={e => {
-                      e.target.style.transform = 'translateY(-1px)';
-                      e.target.style.boxShadow = '0 4px 12px 0 rgba(99,102,241,0.3)';
-                    }}
-                    onMouseLeave={e => {
-                      e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = '0 2px 8px 0 rgba(99,102,241,0.2)';
-                    }}
-                  >
-                    👁️ Preview Page
                   </button>
                   <button
                     onClick={handleSaveAll}
@@ -2119,18 +1834,6 @@ const EditCareers = () => {
           fieldPath={aiModal.fieldPath}
           careerTitle={selectedCareer}
         />
-
-        <ImageGenerationModal
-          isOpen={imageModal.isOpen}
-          onClose={() => setImageModal({ isOpen: false })}
-          careerTitle={selectedPage?.title || selectedCareer}
-          careerDescription={selectedPage?.summary || selectedPage?.description || ''}
-          onImageSelect={handleImageSelect}
-          existingImageUrl={bannerImages[selectedPage?.id] || selectedPage?.bannerImage}
-        />
-        
-        {/* Production Debugger - Remove this after debugging */}
-        <ProductionDebugger />
       </div>
     </div>
   );

@@ -19,6 +19,12 @@ yarn.lock
 .env.test.local
 .env.production.local
 
+# Firebase Functions
+functions/.runtimeconfig.json
+functions/lib/
+backend-ai/.runtimeconfig.json
+backend-ai/lib/
+
 # IDE and Editor files
 .vscode/
 .idea/
@@ -117,7 +123,7 @@ ui-debug.log
 # Frontend specific
 /frontend/src/**/*.js.map
 /frontend/src/**/*.css.map
-
+/functions
 # AI Backend specific
 /backend-ai/.env
 

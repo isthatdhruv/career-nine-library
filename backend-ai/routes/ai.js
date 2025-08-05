@@ -48,6 +48,84 @@ router.post('/stats/reset', (req, res) => {
   }
 });
 
+// Image generation endpoint
+router.post('/generate-image', async (req, res) => {
+  const startTime = Date.now();
+  
+  try {
+    const { prompt, size = '1024x1024', quality = 'standard', style = 'natural', model = 'gpt-image-1' } = req.body;
+
+    // Validation
+    if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
+      return res.status(400).json({
+        error: 'Prompt is required and must be a non-empty string'
+      });
+    }
+
+    if (prompt.length > 1000) {
+      return res.status(400).json({
+        error: 'Prompt must be 1000 characters or less'
+      });
+    }
+
+    console.log(`🎨 Image generation request:`, {
+      prompt: prompt.substring(0, 100) + (prompt.length > 100 ? '...' : ''),
+      model,
+      size,
+      quality,
+      style,
+      timestamp: new Date().toISOString()
+    });
+
+    const result = await aiService.generateImage({
+      prompt: prompt.trim(),
+      model,
+      size,
+      quality,
+      style
+    });
+
+    const processingTime = Date.now() - startTime;
+
+    // Track stats
+    statsTracker.trackImageGeneration({ 
+      success: true, 
+      imagesGenerated: 1,
+      processingTime,
+      endpoint: '/generate-image'
+    });
+
+    res.json({
+      success: true,
+      imageUrl: result.imageUrl,
+      prompt: prompt.trim(),
+      size,
+      quality,
+      style,
+      processingTime,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    const processingTime = Date.now() - startTime;
+    console.error('Image generation error:', error);
+
+    // Track failed request
+    statsTracker.trackImageGeneration({ 
+      success: false, 
+      imagesGenerated: 0,
+      processingTime,
+      endpoint: '/generate-image'
+    });
+
+    res.status(500).json({
+      error: 'Image generation failed',
+      message: error.message,
+      processingTime,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
 
 
 // Main content enhancement endpoint (frontend calls /api/ai/enhance)

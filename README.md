@@ -140,23 +140,26 @@ const firebaseConfig = {
 
 ## 🚀 Running the Application
 
-### Start All Services
+### Development Mode
 
 #### 1. Frontend (Port 3001)
 ```bash
 cd frontend
+npm install
 npm start
 ```
 
 #### 2. AI Backend (Port 3002)
 ```bash
 cd backend-ai
+npm install
 npm start
 ```
 
 #### 3. Main Backend (Port 3003) - Optional
 ```bash
 cd backend
+npm install
 PORT=3003 node server.js
 ```
 
@@ -164,6 +167,36 @@ PORT=3003 node server.js
 1. Open Chrome and navigate to `chrome://extensions/`
 2. Enable "Developer mode"
 3. Click "Load unpacked" and select the `plugin/` directory
+
+## ☁️ Production Deployment
+
+### Deploy Frontend to Firebase Hosting
+```bash
+cd frontend
+npm install
+npm run build
+firebase deploy --only hosting
+```
+
+### Deploy AI Backend to Firebase Functions
+```bash
+cd backend-ai
+npm install
+# Configure OpenAI API key (optional)
+firebase functions:config:set openai.api_key="your_key_here"
+# Deploy functions
+firebase deploy --only functions
+```
+
+### Deploy from Root (Both Frontend + Backend)
+```bash
+# Build frontend
+cd frontend && npm run build && cd ..
+# Install backend dependencies
+cd backend-ai && npm install && cd ..
+# Deploy everything
+firebase deploy
+```
 
 ## 📱 Usage
 

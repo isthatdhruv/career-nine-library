@@ -8,7 +8,7 @@ import AllCareers from './Pages/AllCareers/AllCareers';
 import EditCareers from './Pages/EditCareers/EditCareers';
 import CareerLibrary from './Pages/CareerLibrary/CareerLibrary.tsx';
 import ApiHealth from './Pages/ApiHealth/ApiHealth';
-
+import PreviewPage from './Pages/previewPage/careerPreview.tsx';
 function parseLinks(links) {
   // Parse links into a nested structure: domain > section > career
   const tree = {};
@@ -365,6 +365,8 @@ function App() {
         <Route path="/edit-careers" element={<EditCareers />} />
         <Route path="/career-library" element={<CareerLibrary />} />
         <Route path="/api-health" element={<ApiHealth />} />
+        <Route path="/preview-career" element={<PreviewPage />} />
+        <Route path="/preview-career/:slug" element={<PreviewPage />} />
       </Routes>
     </Router>
   );
