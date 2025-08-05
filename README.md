@@ -314,4 +314,4 @@ For questions, issues, or contributions, please:
 
 ---
 
-Built with ❤️ for career development and education
+Built with ❤️ by Dhruv for career-9.com 
