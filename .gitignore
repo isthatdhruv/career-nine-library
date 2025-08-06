@@ -133,7 +133,6 @@ ui-debug.log
 **/firebase-adminsdk-*.json
 
 # Emulator data
-/frontend/emulator-data/
 /frontend/emulator-to-production/emulator-data-prod/
 
 # Python

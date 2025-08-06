@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { db } from './firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, deleteDoc, doc, where } from 'firebase/firestore';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import AllCareers from './Pages/AllCareers/AllCareers';
@@ -362,6 +362,39 @@ function MainApp() {
 }
 
 function App() {
+  // Clean up old temporary preview documents on app load
+  useEffect(() => {
+    const cleanupOldTempDocuments = async () => {
+      try {
+        const tempCollection = collection(db, 'tempPreviewPages');
+        const cutoffTime = new Date(Date.now() - 10 * 60 * 1000); // 10 minutes ago
+        const cutoffISOString = cutoffTime.toISOString();
+        
+        // Query for documents older than 10 minutes
+        const oldDocsQuery = query(
+          tempCollection,
+          where('createdAt', '<', cutoffISOString)
+        );
+        
+        const querySnapshot = await getDocs(oldDocsQuery);
+        
+        // Delete old documents
+        const deletePromises = querySnapshot.docs.map(docSnap => 
+          deleteDoc(doc(db, 'tempPreviewPages', docSnap.id))
+        );
+        
+        if (deletePromises.length > 0) {
+          await Promise.all(deletePromises);
+          console.log(`Cleaned up ${deletePromises.length} old temporary preview documents`);
+        }
+      } catch (error) {
+        console.warn('Failed to cleanup old temporary documents:', error);
+      }
+    };
+    
+    cleanupOldTempDocuments();
+  }, []);
+
   return (
     <Router>
       <Routes>

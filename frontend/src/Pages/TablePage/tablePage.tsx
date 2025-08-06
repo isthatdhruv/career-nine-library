@@ -27,6 +27,12 @@ interface WorkValue {
   [key: string]: any;
 }
 
+interface WorkValueEntry {
+  key: string;
+  value: any;
+  assignedPages?: string[]; // Track which pages this work value is assigned to
+}
+
 const TablePage: React.FC = () => {
   const { careerPagesMap, loading: dataLoading, refreshData } = useData();
   const [categories, setCategories] = useState<Category[]>([]);
@@ -34,6 +40,8 @@ const TablePage: React.FC = () => {
   const [workValues, setWorkValues] = useState<WorkValue>({});
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [openDropdowns, setOpenDropdowns] = useState<{ [key: string]: boolean }>({});
+  const [selectedPagesForWorkValue, setSelectedPagesForWorkValue] = useState<{ [key: string]: string[] }>({});
 
   // Convert careerPagesMap to array for easier handling
   const careerPages: CareerPage[] = Object.values(careerPagesMap) as CareerPage[];
@@ -103,6 +111,21 @@ const TablePage: React.FC = () => {
       fetchWorkValues();
     }
   }, [dataLoading, workValues]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.dropdown-container')) {
+        setOpenDropdowns({});
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const fetchCategories = async () => {
     try {
@@ -394,23 +417,23 @@ const TablePage: React.FC = () => {
   };
 
   // Handle removing page
-  const handleRemovePage = async (pageId: string) => {
-    const page = careerPages.find(p => p.id === pageId);
-    if (!page) return;
+  // const handleRemovePage = async (pageId: string) => {
+  //   const page = careerPages.find(p => p.id === pageId);
+  //   if (!page) return;
 
-    const confirmDelete = window.confirm(`Are you sure you want to delete the page "${page.title || page.id}"?`);
-    if (!confirmDelete) return;
+  //   const confirmDelete = window.confirm(`Are you sure you want to delete the page "${page.title || page.id}"?`);
+  //   if (!confirmDelete) return;
 
-    try {
-      await deleteDoc(doc(db, 'careerPages', pageId));
-      console.log('Page removed successfully:', pageId);
-      // Note: The page will disappear from the list when DataContext refreshes
-      alert('Page deleted successfully! It may take a moment to disappear from the list.');
-    } catch (error) {
-      console.error('Error removing page:', error);
-      alert('Failed to remove page. Please try again.');
-    }
-  };
+  //   try {
+  //     await deleteDoc(doc(db, 'careerPages', pageId));
+  //     console.log('Page removed successfully:', pageId);
+  //     // Note: The page will disappear from the list when DataContext refreshes
+  //     alert('Page deleted successfully! It may take a moment to disappear from the list.');
+  //   } catch (error) {
+  //     console.error('Error removing page:', error);
+  //     alert('Failed to remove page. Please try again.');
+  //   }
+  // };
 
   // Handle adding category to page
   const handleAddCategoryToPage = async (pageId: string) => {
@@ -519,6 +542,59 @@ const TablePage: React.FC = () => {
     }
   };
 
+  // Handle removing work value from page
+  const handleRemoveWorkValueFromPage = async (pageId: string, workValueToRemove: string) => {
+    console.log('Remove work value button clicked for page:', pageId, 'work value:', workValueToRemove);
+    
+    const page = careerPages.find(p => p.id === pageId);
+    if (!page) {
+      alert('Page not found');
+      return;
+    }
+
+    const displayValue = resolveWorkValueDisplay(workValueToRemove);
+    const confirmRemove = window.confirm(`Are you sure you want to remove the work value "${displayValue}" from this page?`);
+    if (!confirmRemove) return;
+
+    try {
+      // Get current work values
+      const currentValues = page.values || [];
+      console.log('Current work values:', currentValues);
+      
+      // Check if work value exists
+      if (!currentValues.includes(workValueToRemove)) {
+        alert('This work value is not assigned to this page');
+        return;
+      }
+
+      // Remove the work value
+      const updatedValues = currentValues.filter(val => val !== workValueToRemove);
+      console.log('Updated work values:', updatedValues);
+      
+      // Update the document in Firestore
+      console.log('Attempting to update Firestore document...');
+      await updateDoc(doc(db, 'careerPages', pageId), {
+        values: updatedValues,
+        lastModified: new Date().toISOString()
+      });
+
+      console.log(`Removed work value "${workValueToRemove}" from page "${page.title || pageId}"`);
+      alert(`Successfully removed work value "${displayValue}" from page!`);
+      
+      // Refresh data to show changes immediately
+      refreshData();
+      
+    } catch (error) {
+      console.error('Error removing work value from page:', error);
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        stack: error.stack
+      });
+      alert(`Failed to remove work value from page. Error: ${error.message}`);
+    }
+  };
+
   // Handle adding new work value
   const handleAddMapping = async () => {
     const key = prompt('Enter work value key:');
@@ -584,6 +660,261 @@ const TablePage: React.FC = () => {
       alert(`Failed to remove work value. Error: ${error.message || 'Unknown error'}`);
     }
   };
+
+  // Toggle dropdown visibility
+  const toggleDropdown = (workValueKey: string) => {
+    setOpenDropdowns(prev => {
+      const isOpening = !prev[workValueKey];
+      
+      if (isOpening) {
+        // When opening dropdown, initialize selection with pages that already have this work value
+        const workValue = workValues[workValueKey];
+        const actualValue = Array.isArray(workValue) ? workValue.join(', ') : String(workValue);
+        const filteredPages = getFilteredPagesForCategory();
+        
+        const pagesWithValue = filteredPages
+          .filter(page => page.values && (
+            page.values.includes(actualValue) || 
+            page.values.includes(workValueKey)
+          ))
+          .map(page => page.id);
+        
+        setSelectedPagesForWorkValue(prevSelection => ({
+          ...prevSelection,
+          [workValueKey]: pagesWithValue
+        }));
+      }
+      
+      return {
+        ...prev,
+        [workValueKey]: isOpening
+      };
+    });
+  };
+
+  // Handle page selection for work value
+  const handlePageSelectionForWorkValue = (workValueKey: string, pageId: string) => {
+    setSelectedPagesForWorkValue(prev => {
+      const currentSelection = prev[workValueKey] || [];
+      const isSelected = currentSelection.includes(pageId);
+      
+      const updatedSelection = isSelected
+        ? currentSelection.filter(id => id !== pageId)
+        : [...currentSelection, pageId];
+      
+      return {
+        ...prev,
+        [workValueKey]: updatedSelection
+      };
+    });
+  };
+
+  // Apply work value to selected pages (Save Changes Logic)
+  const handleApplyWorkValueToPages = async (workValueKey: string) => {
+    const selectedPages = selectedPagesForWorkValue[workValueKey] || [];
+    const workValue = workValues[workValueKey];
+    if (!workValue) {
+      alert('Work value not found.');
+      return;
+    }
+
+    const actualValue = Array.isArray(workValue) ? workValue.join(', ') : String(workValue);
+    const filteredPages = getFilteredPagesForCategory();
+    
+    // Separate pages into those that should have the work value and those that shouldn't
+    const pagesToAdd: string[] = [];
+    const pagesToRemove: string[] = [];
+    
+    filteredPages.forEach(page => {
+      const hasWorkValue = page.values && (
+        page.values.includes(actualValue) || 
+        page.values.includes(workValueKey)
+      );
+      const isSelected = selectedPages.includes(page.id);
+      
+      if (isSelected && !hasWorkValue) {
+        // Page is selected but doesn't have the work value - add it
+        pagesToAdd.push(page.id);
+      } else if (!isSelected && hasWorkValue) {
+        // Page is not selected but has the work value - remove it
+        pagesToRemove.push(page.id);
+      }
+    });
+
+    if (pagesToAdd.length === 0 && pagesToRemove.length === 0) {
+      alert('No changes to save.');
+      return;
+    }
+
+    const confirmMessage: string[] = [];
+    if (pagesToAdd.length > 0) {
+      confirmMessage.push(`Add work value to ${pagesToAdd.length} pages`);
+    }
+    if (pagesToRemove.length > 0) {
+      confirmMessage.push(`Remove work value from ${pagesToRemove.length} pages`);
+    }
+    
+    const confirmSave = window.confirm(
+      `Save changes?\n\n${confirmMessage.join('\n')}`
+    );
+    if (!confirmSave) return;
+
+    try {
+      const batch = writeBatch(db);
+      
+      // Add work value to selected pages that don't have it
+      pagesToAdd.forEach(pageId => {
+        const pageRef = doc(db, 'careerPages', pageId);
+        const page = careerPages.find(p => p.id === pageId);
+        const currentValues = page?.values || [];
+        
+        // Add the actual value
+        const updatedValues = [...currentValues, actualValue];
+        batch.update(pageRef, {
+          values: updatedValues,
+          lastModified: new Date().toISOString()
+        });
+      });
+      
+      // Remove work value from unselected pages that have it
+      pagesToRemove.forEach(pageId => {
+        const pageRef = doc(db, 'careerPages', pageId);
+        const page = careerPages.find(p => p.id === pageId);
+        const currentValues = page?.values || [];
+        
+        // Remove both the actual value and the old key if they exist
+        const updatedValues = currentValues.filter(val => 
+          val !== actualValue && val !== workValueKey
+        );
+        
+        batch.update(pageRef, {
+          values: updatedValues,
+          lastModified: new Date().toISOString()
+        });
+      });
+
+      await batch.commit();
+      
+      const totalChanges = pagesToAdd.length + pagesToRemove.length;
+      console.log(`Applied changes to ${totalChanges} pages for work value "${actualValue}"`);
+      alert(`Successfully saved changes to ${totalChanges} pages!`);
+      
+      // Clear selection and close dropdown
+      setSelectedPagesForWorkValue(prev => ({
+        ...prev,
+        [workValueKey]: []
+      }));
+      setOpenDropdowns(prev => ({
+        ...prev,
+        [workValueKey]: false
+      }));
+      
+      // Refresh data to show changes
+      refreshData();
+      
+    } catch (error) {
+      console.error('Error saving work value changes:', error);
+      alert(`Failed to save changes. Error: ${error.message || 'Unknown error'}`);
+    }
+  };
+
+  // Handle removing work value from selected pages
+  const handleRemoveWorkValueFromPages = async (workValueKey: string) => {
+    const workValue = workValues[workValueKey];
+    if (!workValue) {
+      alert('Work value not found.');
+      return;
+    }
+
+    const actualValue = Array.isArray(workValue) ? workValue.join(', ') : String(workValue);
+    const filteredPages = getFilteredPagesForCategory();
+    
+    // Find pages that have this work value (either as actual value or old key)
+    const pagesWithValue = filteredPages.filter(page => 
+      page.values && (
+        page.values.includes(actualValue) || 
+        page.values.includes(workValueKey)
+      )
+    );
+
+    if (pagesWithValue.length === 0) {
+      alert('No pages in this category have this work value.');
+      return;
+    }
+
+    const confirmRemove = window.confirm(
+      `Are you sure you want to remove the work value "${actualValue}" from ${pagesWithValue.length} pages in the "${selectedCategory}" category?`
+    );
+    if (!confirmRemove) return;
+
+    try {
+      const batch = writeBatch(db);
+      
+      pagesWithValue.forEach(page => {
+        const pageRef = doc(db, 'careerPages', page.id);
+        const currentValues = page.values || [];
+        
+        // Remove both the actual value and the old key if they exist
+        const updatedValues = currentValues.filter(val => 
+          val !== actualValue && val !== workValueKey
+        );
+        
+        batch.update(pageRef, {
+          values: updatedValues,
+          lastModified: new Date().toISOString()
+        });
+      });
+
+      await batch.commit();
+      
+      console.log(`Removed work value "${actualValue}" from ${pagesWithValue.length} pages`);
+      alert(`Successfully removed work value "${actualValue}" from ${pagesWithValue.length} pages!`);
+      
+      // Refresh data to show changes
+      refreshData();
+      
+    } catch (error) {
+      console.error('Error removing work value from pages:', error);
+      alert(`Failed to remove work value from pages. Error: ${error.message || 'Unknown error'}`);
+    }
+  };
+
+  // Helper function to resolve work value display text
+  const resolveWorkValueDisplay = (value: string) => {
+    // If the value is a key that exists in workValues, return the actual work value
+    if (workValues[value]) {
+      const workValue = workValues[value];
+      return Array.isArray(workValue) ? workValue.join(', ') : String(workValue);
+    }
+    // Otherwise, return the value as is (it's already an actual work value)
+    return value;
+  };
+
+  // Get filtered pages for the selected category
+  const getFilteredPagesForCategory = () => {
+    if (!selectedCategory) return [];
+    
+    return careerPages.filter(page => {
+      // Check if page has the selected category in its categories array
+      if (page.categories && page.categories.includes(selectedCategory)) {
+        return true;
+      }
+      
+      // Also check if category can be extracted from pageUrl
+      if (page.pageUrl) {
+        try {
+          const url = new URL(page.pageUrl);
+          const pathParts = url.pathname.replace(/^\//, '').split('/');
+          const clIdx = pathParts.findIndex(p => p === 'careerlibrary');
+          return clIdx !== -1 && pathParts[clIdx + 1] === selectedCategory;
+        } catch (e) {
+          return false;
+        }
+      }
+      
+      return false;
+    });
+  };
   
 
   if (dataLoading || loading) {
@@ -606,13 +937,13 @@ const TablePage: React.FC = () => {
         <div className="table-section">
           <div className="table-header">
             <h3>Categories</h3>
-            <button 
+            {/* <button 
               className="add-button"
               onClick={handleAddCategory}
               title="Add New Category"
             >
               <FaPlus />
-            </button>
+            </button> */}
           </div>
           <div className="table-wrapper">
             <div className="table-content">
@@ -672,13 +1003,13 @@ const TablePage: React.FC = () => {
                 </span>
               )}
             </h3>
-            <button 
+            {/* <button 
               className="add-button"
               onClick={handleAddPage}
               title="Add New Page"
             >
               <FaPlus />
-            </button>
+            </button> */}
           </div>
           <div className="table-wrapper">
             <div className="table-content">
@@ -731,6 +1062,73 @@ const TablePage: React.FC = () => {
                           ))}
                         </div>
                       )}
+                      {/* Show work values if any are applied */}
+                      {page.values && page.values.length > 0 && (
+                        <div className="row-tags" style={{ marginTop: '4px' }}>
+                          <span style={{ 
+                            fontSize: '10px', 
+                            color: '#6b7280', 
+                            marginRight: '4px' 
+                          }}>
+                            Work Values:
+                          </span>
+                          {page.values.slice(0, 3).map((value: string, index: number) => {
+                            const displayValue = resolveWorkValueDisplay(value);
+                            return (
+                              <span 
+                                key={index} 
+                                style={{
+                                  background: '#e0f2fe',
+                                  color: '#0369a1',
+                                  padding: '2px 6px',
+                                  borderRadius: '3px',
+                                  fontSize: '10px',
+                                  marginRight: '4px',
+                                  border: '1px solid #bae6fd',
+                                  position: 'relative',
+                                  paddingRight: '16px'
+                                }}
+                              >
+                                {displayValue.length > 20 ? displayValue.substring(0, 20) + '...' : displayValue}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveWorkValueFromPage(page.id, value);
+                                  }}
+                                  style={{
+                                    position: 'absolute',
+                                    right: '2px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#0369a1',
+                                    fontSize: '8px',
+                                    cursor: 'pointer',
+                                    padding: '0',
+                                    width: '10px',
+                                    height: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                  title={`Remove "${displayValue}" from this page`}
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            );
+                          })}
+                          {page.values.length > 3 && (
+                            <span style={{ 
+                              fontSize: '10px', 
+                              color: '#6b7280' 
+                            }}>
+                              +{page.values.length - 3} more
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="row-actions">
                       {/* Show Add button only when a category is selected and page doesn't have that category */}
@@ -768,6 +1166,11 @@ const TablePage: React.FC = () => {
         <div className="table-section">
           <div className="table-header">
             <h3>Work Values</h3>
+            {selectedCategory && (
+              <span className="filter-indicator">
+                (Apply to: {selectedCategory} pages)
+              </span>
+            )}
             <button 
               className="add-button"
               onClick={handleAddMapping}
@@ -778,28 +1181,248 @@ const TablePage: React.FC = () => {
           </div>
           <div className="table-wrapper">
             <div className="table-content">
-              {Object.entries(workValues).map(([key, value]) => (
-                <div key={key} className="table-row">
-                  <div className="row-content">
-                    <div className="row-title">
-                      {Array.isArray(value) 
-                        ? value.join(', ') 
-                        : typeof value === 'object' 
-                          ? JSON.stringify(value) 
-                          : String(value)
-                      }
+              {Object.entries(workValues).map(([key, value]) => {
+                const filteredPages = getFilteredPagesForCategory();
+                const selectedPages = selectedPagesForWorkValue[key] || [];
+                const isDropdownOpen = openDropdowns[key] || false;
+                
+                return (
+                  <div key={key} className="table-row">
+                    <div className="row-content">
+                      <div className="row-title">{value}</div>
+                      <div className="row-subtitle">
+                        {Array.isArray(value) 
+                          ? value.join(', ') 
+                          : typeof value === 'object' 
+                            ? JSON.stringify(value) 
+                            : String(value)
+                        }
+                      </div>
+                      
+                      {/* Page Selection Dropdown */}
+                      {selectedCategory && filteredPages.length > 0 && (
+                        <div className="work-value-assignment" style={{ marginTop: '8px' }}>
+                          <div className="dropdown-container" style={{ position: 'relative', display: 'inline-block' }}>
+                            {(() => {
+                              const workValue = workValues[key];
+                              const actualValue = Array.isArray(workValue) ? workValue.join(', ') : String(workValue);
+                              const pagesWithValue = filteredPages.filter(page => 
+                                page.values && (
+                                  page.values.includes(actualValue) || // Check for actual value
+                                  page.values.includes(key) // Check for old key
+                                )
+                              ).length;
+                              
+                              return (
+                                <button
+                                  onClick={() => toggleDropdown(key)}
+                                  style={{
+                                    background: selectedPages.length > 0 ? '#10b981' : '#6b7280',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    padding: '6px 12px',
+                                    fontSize: '12px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px'
+                                  }}
+                                >
+                                  Select Pages ({selectedPages.length}/{filteredPages.length}) 
+                                  {pagesWithValue > 0 && (
+                                    <span style={{ 
+                                      fontSize: '10px', 
+                                      background: '#10b981', 
+                                      padding: '1px 4px', 
+                                      borderRadius: '3px',
+                                      marginLeft: '4px'
+                                    }}>
+                                      {pagesWithValue} applied
+                                    </span>
+                                  )}
+                                  <span style={{ fontSize: '10px' }}>
+                                    {isDropdownOpen ? '▲' : '▼'}
+                                  </span>
+                                </button>
+                              );
+                            })()}
+                            
+                            {isDropdownOpen && (
+                              <div style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: 0,
+                                background: 'white',
+                                border: '1px solid #d1d5db',
+                                borderRadius: '6px',
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                                zIndex: 1000,
+                                minWidth: '250px',
+                                maxHeight: '200px',
+                                overflowY: 'auto'
+                              }}>
+                                <div style={{ padding: '8px' }}>
+                                  <div style={{ 
+                                    fontSize: '12px', 
+                                    fontWeight: '600', 
+                                    color: '#374151', 
+                                    marginBottom: '6px' 
+                                  }}>
+                                    Select pages from {selectedCategory}:
+                                  </div>
+                                  
+                                  {filteredPages.map(page => {
+                                    const workValue = workValues[key];
+                                    const actualValue = Array.isArray(workValue) ? workValue.join(', ') : String(workValue);
+                                    const hasWorkValue = page.values && (
+                                      page.values.includes(actualValue) || // Check for actual value
+                                      page.values.includes(key) // Check for old key
+                                    );
+                                    const isSelected = selectedPages.includes(page.id);
+                                    
+                                    return (
+                                      <label
+                                        key={page.id}
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          padding: '4px 0',
+                                          cursor: 'pointer',
+                                          fontSize: '12px'
+                                        }}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={isSelected}
+                                          onChange={() => handlePageSelectionForWorkValue(key, page.id)}
+                                          style={{ marginRight: '6px' }}
+                                        />
+                                        <span style={{ 
+                                          color: hasWorkValue ? '#10b981' : (isSelected ? '#10b981' : '#374151'),
+                                          fontWeight: (hasWorkValue || isSelected) ? '600' : 'normal'
+                                        }}>
+                                          {page.title || page.id}
+                                          {hasWorkValue && (
+                                            <span style={{ 
+                                              marginLeft: '6px', 
+                                              fontSize: '10px', 
+                                              color: '#10b981',
+                                              fontWeight: '600'
+                                            }}>
+                                              ✓ Currently Applied
+                                            </span>
+                                          )}
+                                        </span>
+                                      </label>
+                                    );
+                                  })}
+                                  
+                                  <div style={{ 
+                                    borderTop: '1px solid #e5e7eb', 
+                                    marginTop: '6px', 
+                                    paddingTop: '6px',
+                                    display: 'flex',
+                                    gap: '6px',
+                                    flexDirection: 'column'
+                                  }}>
+                                    <div style={{ display: 'flex', gap: '6px' }}>
+                                      <button
+                                        onClick={() => handleApplyWorkValueToPages(key)}
+                                        style={{
+                                          background: '#10b981',
+                                          color: 'white',
+                                          border: 'none',
+                                          borderRadius: '4px',
+                                          padding: '4px 8px',
+                                          fontSize: '11px',
+                                          cursor: 'pointer',
+                                          flex: 1
+                                        }}
+                                      >
+                                        Save Changes
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          setSelectedPagesForWorkValue(prev => ({
+                                            ...prev,
+                                            [key]: []
+                                          }));
+                                        }}
+                                        style={{
+                                          background: '#6b7280',
+                                          color: 'white',
+                                          border: 'none',
+                                          borderRadius: '4px',
+                                          padding: '4px 8px',
+                                          fontSize: '11px',
+                                          cursor: 'pointer'
+                                        }}
+                                      >
+                                        Clear
+                                      </button>
+                                    </div>
+                                    {(() => {
+                                      const workValue = workValues[key];
+                                      const actualValue = Array.isArray(workValue) ? workValue.join(', ') : String(workValue);
+                                      const pagesWithValue = filteredPages.filter(page => 
+                                        page.values && (
+                                          page.values.includes(actualValue) || 
+                                          page.values.includes(key)
+                                        )
+                                      ).length;
+                                      
+                                      if (pagesWithValue > 0) {
+                                        return (
+                                          <button
+                                            onClick={() => handleRemoveWorkValueFromPages(key)}
+                                            style={{
+                                              background: '#ef4444',
+                                              color: 'white',
+                                              border: 'none',
+                                              borderRadius: '4px',
+                                              padding: '4px 8px',
+                                              fontSize: '11px',
+                                              cursor: 'pointer',
+                                              width: '100%'
+                                            }}
+                                          >
+                                            Remove from {pagesWithValue} pages
+                                          </button>
+                                        );
+                                      }
+                                      return null;
+                                    })()}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {!selectedCategory && (
+                        <div style={{ 
+                          fontSize: '12px', 
+                          color: '#6b7280', 
+                          marginTop: '4px',
+                          fontStyle: 'italic'
+                        }}>
+                          Select a category to assign this work value to pages
+                        </div>
+                      )}
                     </div>
-                    <div className="row-subtitle">{key}</div>
+                    
+                    <button 
+                      className="remove-button"
+                      onClick={() => handleRemoveMapping(key)}
+                      title="Remove Item"
+                    >
+                      <FaMinus />
+                    </button>
                   </div>
-                  <button 
-                    className="remove-button"
-                    onClick={() => handleRemoveMapping(key)}
-                    title="Remove Item"
-                  >
-                    <FaMinus />
-                  </button>
-                </div>
-              ))}
+                );
+              })}
               {Object.keys(workValues).length === 0 && (
                 <div className="empty-state">
                   <p>No work values found</p>

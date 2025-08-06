@@ -1,7 +1,7 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { db, storage } from '../../firebase';
-import { collection, getDocs, doc, updateDoc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getApiUrl } from '../../config/api';
 import ImageGenerationModal from '../../components/ImageGenerationModal';
@@ -1252,6 +1252,66 @@ const EditCareers = () => {
   const [saving, setSaving] = useState({});
   const [deleting, setDeleting] = useState({});
   const [showHiddenPages, setShowHiddenPages] = useState(false);
+  const [returnFromPreviewMessage, setReturnFromPreviewMessage] = useState('');
+  const [isNavigatingFromPreview, setIsNavigatingFromPreview] = useState(false);
+  const [preservedEditState, setPreservedEditState] = useState({});
+  
+  // Use a ref to persist edit state across renders and optimizations
+  const editStateRef = useRef({});
+  const preservedEditStateRef = useRef({});
+  
+  // Session storage keys for persistence across potential React optimizations
+  const SESSION_KEYS = {
+    EDIT_STATE: 'editCareers_editState',
+    PRESERVED_STATE: 'editCareers_preservedState',
+    RETURN_FROM_PREVIEW: 'editCareers_returnFromPreview'
+  };
+  
+  // Load preserved state from session storage on mount
+  useEffect(() => {
+    try {
+      const savedPreservedState = sessionStorage.getItem(SESSION_KEYS.PRESERVED_STATE);
+      if (savedPreservedState) {
+        const parsed = JSON.parse(savedPreservedState);
+        setPreservedEditState(parsed);
+        preservedEditStateRef.current = parsed;
+        console.log('📦 Loaded preserved edit state from session storage:', parsed);
+      }
+      
+      const savedEditState = sessionStorage.getItem(SESSION_KEYS.EDIT_STATE);
+      if (savedEditState) {
+        const parsed = JSON.parse(savedEditState);
+        setEditState(parsed);
+        editStateRef.current = parsed;
+        console.log('📦 Loaded edit state from session storage:', parsed);
+      }
+    } catch (error) {
+      console.warn('Failed to load state from session storage:', error);
+    }
+  }, []);
+  
+  // Sync refs with state and save to session storage
+  useEffect(() => {
+    editStateRef.current = editState;
+    try {
+      sessionStorage.setItem(SESSION_KEYS.EDIT_STATE, JSON.stringify(editState));
+    } catch (error) {
+      console.warn('Failed to save edit state to session storage:', error);
+    }
+  }, [editState]);
+  
+  useEffect(() => {
+    preservedEditStateRef.current = preservedEditState;
+    try {
+      if (Object.keys(preservedEditState).length > 0) {
+        sessionStorage.setItem(SESSION_KEYS.PRESERVED_STATE, JSON.stringify(preservedEditState));
+      } else {
+        sessionStorage.removeItem(SESSION_KEYS.PRESERVED_STATE);
+      }
+    } catch (error) {
+      console.warn('Failed to save preserved state to session storage:', error);
+    }
+  }, [preservedEditState]);
   // ...existing code...
 
   useEffect(() => {
@@ -1293,6 +1353,11 @@ const EditCareers = () => {
       setOriginalState({});
       return;
     }
+    
+    console.log('🔄 Page filtering useEffect running for career:', selectedCareer);
+    console.log('🔄 isNavigatingFromPreview:', isNavigatingFromPreview);
+    console.log('🔄 Current edit state before filtering:', editState);
+    
     const filtered = careerPages.filter(page => {
       // Filter by visibility based on toggle
       if (!showHiddenPages && page.isActive === false) return false;
@@ -1309,7 +1374,10 @@ const EditCareers = () => {
       return false;
     });
     setPages(filtered);
-    setSelectedPageId(filtered.length > 0 ? filtered[0].id : null);
+    // Only set the first page as selected if we're not navigating from preview
+    if (!isNavigatingFromPreview) {
+      setSelectedPageId(filtered.length > 0 ? filtered[0].id : null);
+    }
     // Set originalState for undo (for all headings in all filtered pages)
     const orig = {};
     filtered.forEach(page => {
@@ -1320,78 +1388,173 @@ const EditCareers = () => {
         }
       });
     });
-    setOriginalState(orig);
-  }, [selectedCareer, careerPages, showHiddenPages]);
+    
+    // Only update original state if we're not navigating from preview to preserve edit state
+    if (!isNavigatingFromPreview) {
+      setOriginalState(orig);
+    } else {
+      console.log('🚫 Skipping original state update during preview navigation');
+      // Set original state with a delay to allow edit state restoration first
+      setTimeout(() => {
+        console.log('🔄 Setting original state after preview navigation');
+        setOriginalState(prevOrig => ({
+          ...prevOrig,
+          ...orig
+        }));
+      }, 500);
+    }
+    
+    console.log('🔄 Page filtering complete, edit state after filtering:', editState);
+  }, [selectedCareer, careerPages, showHiddenPages, isNavigatingFromPreview]);
 
   // Handle navigation from preview page with selected career
   useEffect(() => {
     if (location.state?.selectedCareer && careers.length > 0 && careerPages.length > 0) {
       const pageSlug = location.state.selectedCareer;
+      const fromPreview = location.state.fromPreview;
+      const isTemporaryPreview = location.state.isTemporaryPreview;
+      const originalId = location.state.originalId;
       
-      // Find the page first
-      const targetPage = careerPages.find(page => page.id === pageSlug);
+      console.log('🔄 Navigation from preview detected:', { pageSlug, fromPreview, isTemporaryPreview, originalId });
+      console.log('🔄 Current preserved edit state (state):', preservedEditState);
+      console.log('🔄 Current preserved edit state (ref):', preservedEditStateRef.current);
       
-      if (targetPage) {
-        // Extract career category from the page's URL
-        let careerCategory = null;
-        
-        if (targetPage.pageUrl) {
-          try {
-            const url = new URL(targetPage.pageUrl);
-            const pathParts = url.pathname.replace(/^\//, '').split('/');
-            const clIdx = pathParts.findIndex(p => p === 'careerlibrary');
-            if (clIdx !== -1 && pathParts[clIdx + 1]) {
-              careerCategory = pathParts[clIdx + 1]; // This should be the main category like 'design'
-            }
-          } catch (e) {
-            console.error('Error parsing URL:', e);
+      // Set flag to prevent other useEffects from interfering
+      if (fromPreview) {
+        setIsNavigatingFromPreview(true);
+      }
+      
+      // If coming from a temporary preview, use the originalId for the actual page
+      const targetPageId = isTemporaryPreview && originalId ? originalId : pageSlug;
+      
+      // Clean up temporary document if this was a temporary preview
+      if (isTemporaryPreview && pageSlug.startsWith('temp_')) {
+        console.log('🗑️ Cleaning up temporary document:', pageSlug);
+        const tempDocRef = doc(db, 'tempPreviewPages', pageSlug);
+        deleteDoc(tempDocRef).catch(error => {
+          console.warn('Failed to cleanup temp document:', error);
+        });
+      }
+      
+      // Find the target page
+      const targetPage = careerPages.find(page => page.id === targetPageId);
+      
+      if (!targetPage) {
+        console.warn('🚨 Target page not found:', targetPageId);
+        return;
+      }
+      
+      // Extract career category from the page's URL or use page.career field
+      let careerCategory = targetPage.career;
+      
+      if (!careerCategory && targetPage.pageUrl) {
+        try {
+          const url = new URL(targetPage.pageUrl);
+          const pathParts = url.pathname.replace(/^\//, '').split('/');
+          const clIdx = pathParts.findIndex(p => p === 'careerlibrary');
+          if (clIdx !== -1 && pathParts[clIdx + 1]) {
+            careerCategory = pathParts[clIdx + 1];
           }
-        }
-        
-        // If we found a career category from URL, look for it in careers list
-        if (careerCategory) {
-          const matchingCareer = careers.find(career => 
-            career.toLowerCase().replace(/\s+/g, '-') === careerCategory ||
-            career.toLowerCase() === careerCategory ||
-            careerCategory.includes(career.toLowerCase().replace(/\s+/g, '-')) ||
-            career.toLowerCase().includes(careerCategory)
-          );
-          
-          if (matchingCareer) {
-            setSelectedCareer(matchingCareer);
-            
-            // Wait for the pages to be filtered and then select the specific page
-            setTimeout(() => {
-              setSelectedPageId(pageSlug);
-              // Reset all sections to collapsed when switching from preview
-              const newCollapsed = {};
-              defaultHeadings.forEach(heading => {
-                newCollapsed[heading] = true;
-              });
-              setCollapsedHeadings(newCollapsed);
-            }, 100);
-          }
-        }
-        
-        // Fallback: if no career category found from URL, try to find by page.career field
-        if (!careerCategory && targetPage.career && careers.includes(targetPage.career)) {
-          setSelectedCareer(targetPage.career);
-          setTimeout(() => {
-            setSelectedPageId(pageSlug);
-            // Reset all sections to collapsed when switching from preview
-            const newCollapsed = {};
-            defaultHeadings.forEach(heading => {
-              newCollapsed[heading] = true;
-            });
-            setCollapsedHeadings(newCollapsed);
-          }, 100);
+        } catch (e) {
+          console.error('Error parsing URL:', e);
         }
       }
       
-      // Clear the location state to prevent re-selection on subsequent renders
+      if (!careerCategory) {
+        console.warn('🚨 No career category found for page:', targetPageId);
+        return;
+      }
+      
+      // Find matching career in careers list
+      const matchingCareer = careers.find(career => 
+        career.toLowerCase().replace(/\s+/g, '-') === careerCategory ||
+        career.toLowerCase() === careerCategory ||
+        careerCategory.includes(career.toLowerCase().replace(/\s+/g, '-')) ||
+        career.toLowerCase().includes(careerCategory)
+      ) || careerCategory;
+      
+      // Main navigation function
+      const performNavigation = () => {
+        console.log('🎯 Performing navigation to:', { career: matchingCareer, pageId: targetPageId });
+        
+        // Set career and page
+        setSelectedCareer(matchingCareer);
+        setSelectedPageId(targetPageId);
+        
+        // Restore edit state if coming from preview and we have preserved state
+        // Use ref to get the most recent preserved state
+        const currentPreservedState = preservedEditStateRef.current;
+        const hasPreservedState = Object.keys(currentPreservedState).length > 0;
+        
+        if (fromPreview && hasPreservedState) {
+          console.log('🔄 Restoring edit state from preserved state (ref):', currentPreservedState);
+          
+          // Directly set the preserved edit state using the ref data
+          setEditState(currentPreservedState);
+          
+          // Update the ref as well to maintain consistency
+          editStateRef.current = currentPreservedState;
+          
+          // Set up collapsed headings based on what has changes
+          const pageEditState = currentPreservedState[targetPageId];
+          if (pageEditState) {
+            const newCollapsed = {};
+            const changedSections = [];
+            
+            defaultHeadings.forEach(heading => {
+              const hasChanges = pageEditState[heading] !== undefined;
+              newCollapsed[heading] = !hasChanges; // Expand sections with changes
+              if (hasChanges) {
+                changedSections.push(heading);
+              }
+            });
+            
+            setCollapsedHeadings(newCollapsed);
+            
+            // Show success message
+            if (changedSections.length > 0) {
+              setReturnFromPreviewMessage(`📝 Welcome back! Your unsaved changes are preserved. Expanded sections: ${changedSections.join(', ')}`);
+            } else {
+              setReturnFromPreviewMessage('✅ Welcome back! You can continue editing.');
+            }
+            
+            // Clear message after 5 seconds
+            setTimeout(() => setReturnFromPreviewMessage(''), 5000);
+          }
+          
+          // Clear preserved state after restoration
+          setPreservedEditState({});
+          preservedEditStateRef.current = {};
+          
+          // Clear session storage after successful restoration
+          try {
+            sessionStorage.removeItem(SESSION_KEYS.PRESERVED_STATE);
+            console.log('🧹 Cleared preserved state from session storage');
+          } catch (error) {
+            console.warn('Failed to clear session storage:', error);
+          }
+        } else if (!fromPreview) {
+          // For non-preview navigation, collapse all sections
+          const newCollapsed = {};
+          defaultHeadings.forEach(heading => {
+            newCollapsed[heading] = true;
+          });
+          setCollapsedHeadings(newCollapsed);
+        }
+        
+        // Clear navigation flag
+        setTimeout(() => {
+          setIsNavigatingFromPreview(false);
+        }, 100);
+      };
+      
+      // Execute navigation immediately
+      performNavigation();
+      
+      // Clear the location state to prevent re-execution
       window.history.replaceState({}, document.title);
     }
-  }, [location.state, careers, careerPages]);
+  }, [location.state, careers, careerPages, defaultHeadings]); // Added defaultHeadings to deps
 
   // Check if there are any hidden pages for the selected career
   const hasHiddenPages = careerPages.some(page => {
@@ -1421,10 +1584,14 @@ const EditCareers = () => {
   };
 
   const handleEditChange = (pageId, heading, value) => {
-    setEditState(prev => ({
-      ...prev,
-      [pageId]: { ...prev[pageId], [heading]: value }
-    }));
+    const newEditState = {
+      ...editState,
+      [pageId]: { ...editState[pageId], [heading]: value }
+    };
+    
+    setEditState(newEditState);
+    // Also update the ref to ensure it's always current
+    editStateRef.current = newEditState;
   };
 
   // Undo changes for a heading (reset to original value)
@@ -1640,6 +1807,23 @@ const EditCareers = () => {
         <h1 className={styles.title} style={{ textAlign: 'left', marginLeft: 0, fontSize: 32, fontWeight: 800, color: '#1e293b', marginBottom: 18, letterSpacing: '-1px' }}>
           Career Content Editor
         </h1>
+        
+        {/* Return from preview notification */}
+        {returnFromPreviewMessage && (
+          <div style={{
+            backgroundColor: '#dcfce7',
+            border: '1px solid #bbf7d0',
+            borderRadius: 8,
+            padding: '12px 16px',
+            marginBottom: 20,
+            width: '100%',
+            color: '#166534',
+            fontSize: 14,
+            fontWeight: 500
+          }}>
+            {returnFromPreviewMessage}
+          </div>
+        )}
         
         <div className={styles.careerSelectWrap} style={{ alignItems: 'flex-start', marginBottom: 28 }}>
           <label htmlFor="career-select" className={styles.careerSelectLabel} style={{ textAlign: 'left', marginLeft: 0, fontWeight: 600, fontSize: 18, color: '#334155', marginBottom: 8 }}>Select a Career</label>
@@ -1947,6 +2131,11 @@ const EditCareers = () => {
                               try {
                                 const editValue = editState[selectedPage.id]?.[heading];
                                 if (editValue !== undefined) {
+                                  // If the original value is a string, return the edit value as-is
+                                  if (typeof selectedPage[heading] === 'string') {
+                                    return editValue;
+                                  }
+                                  // If the original value is an object/array, try to parse the edit value
                                   return typeof editValue === 'string' ? JSON.parse(editValue) : editValue;
                                 }
                                 return selectedPage[heading] || '';
@@ -2019,30 +2208,79 @@ const EditCareers = () => {
                   </button>
                   {/* Enhanced Preview Button */}
                   <button
-                    onClick={() => {
-                      // Get current state of the page (edited or original)
-                      const currentPageData = {
-                        ...selectedPage,
-                        ...(editState[selectedPage.id] ? Object.fromEntries(
-                          Object.entries(editState[selectedPage.id]).map(([key, value]) => {
-                            if (typeof selectedPage[key] !== 'string' && value) {
+                    onClick={async () => {
+                      try {
+                        // Get the most current edit state from ref (which is always up to date)
+                        const currentEditState = editStateRef.current;
+                        
+                        // Preserve current edit state before navigating to preview
+                        console.log('💾 Preserving edit state before preview (ref):', currentEditState);
+                        
+                        // Create a deep copy of current edit state for preservation
+                        const preservedState = JSON.parse(JSON.stringify(currentEditState));
+                        setPreservedEditState(preservedState);
+                        preservedEditStateRef.current = preservedState;
+                        
+                        console.log('💾 Preserved edit state set to (both state and ref):', preservedState);
+                        
+                        // Create a temporary document with all current changes
+                        const tempId = `temp_${selectedPage.id}_${Date.now()}`;
+                        const currentPageData = { ...selectedPage };
+                        
+                        // Apply all current edit state changes
+                        if (editState[selectedPage.id]) {
+                          Object.entries(editState[selectedPage.id]).forEach(([key, value]) => {
+                            // If the original field is a string, use the edit value as-is
+                            if (typeof selectedPage[key] === 'string') {
+                              currentPageData[key] = value;
+                            } 
+                            // If the original field is an object/array, parse the edit value
+                            else if (typeof selectedPage[key] === 'object' && selectedPage[key] !== null) {
                               try {
-                                return [key, JSON.parse(value)];
-                              } catch {
-                                return [key, value];
+                                currentPageData[key] = typeof value === 'string' ? JSON.parse(value) : value;
+                              } catch (error) {
+                                console.warn('Failed to parse edit value for preview:', key, error);
+                                currentPageData[key] = value;
                               }
+                            } 
+                            // For any other type, use the value as-is
+                            else {
+                              currentPageData[key] = value;
                             }
-                            return [key, value];
-                          })
-                        ) : {}),
-                        ...(bannerImages[selectedPage.id] && { bannerImage: bannerImages[selectedPage.id] })
-                      };
-                      
-                      // Store the data in sessionStorage for the preview page
-                      sessionStorage.setItem('previewCareerData', JSON.stringify(currentPageData));
-                      
-                      // Navigate to preview page
-                      navigate(`/preview-career/${selectedPage.id}`);
+                          });
+                        }
+                        
+                        // Also include any banner image changes
+                        if (bannerImages[selectedPage.id]) {
+                          currentPageData.bannerImage = bannerImages[selectedPage.id];
+                        }
+                        
+                        // Add metadata for the temp document
+                        currentPageData.isTemporary = true;
+                        currentPageData.originalId = selectedPage.id;
+                        currentPageData.createdAt = new Date().toISOString();
+                        
+                        // Save to temporary collection in Firestore
+                        const tempCollection = collection(db, 'tempPreviewPages');
+                        const tempDocRef = doc(tempCollection, tempId);
+                        await setDoc(tempDocRef, currentPageData);
+                        
+                        // Navigate to preview page with temp ID
+                        navigate(`/preview-career/${tempId}?temp=true`);
+                        
+                        // Clean up temp document after 5 minutes (optional)
+                        setTimeout(async () => {
+                          try {
+                            await deleteDoc(tempDocRef);
+                          } catch (error) {
+                            console.warn('Failed to clean up temp document:', error);
+                          }
+                        }, 5 * 60 * 1000); // 5 minutes
+                        
+                      } catch (error) {
+                        console.error('Error creating preview:', error);
+                        alert('❌ Failed to create preview. Please try again.');
+                      }
                     }}
                     style={{
                       background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',

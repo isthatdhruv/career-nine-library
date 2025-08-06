@@ -9,18 +9,18 @@ function AllCareers() {
   const [careers, setCareers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  async function getTimestamp(){
-    for (const career of careers) {
-      // Assuming each career has a 'timestamp' field
-      if (career.timestamp && new Date(career.timestamp) < new Date('2025-08-17')) {
-        return 'Not Updated';
-      }
-    }
-    const career = await getDocs(collection(db, 'careerPages'));
-
-    const timestamp =  await getDocs(collection(db, 'careerPages'));
-
-  }
+  // async function getTimestamp(){
+  //   const pages = await getDocs(collection(db, 'careerPages'));
+  //   const careers = [];
+  //   pages.forEach(doc => {
+  //     const data = doc.data();
+  //     const timestampsS = data.timestamp <= '2025-08-17' ? 'Not Updated' : data.timestamp;
+      
+  //   });
+  //   return timestamp;
+  //   // const career = await getDocs(collection(db, 'careerPages'));
+  //   // const timestamp =  await getDocs(collection(db, 'careerPages'));
+  // }
   // const timestamp = career.timestamp == '2025-07-17'? 'Not Updated' : career.timestamp;
   useEffect(() => {
     async function fetchCareers() {
@@ -72,7 +72,7 @@ function getCareerPath(url) {
                 <tr key={career.id}>
                   <td>{career.id}</td>
                   <td>{getCareerPath(career.pageUrl)}</td>
-                  <td>{career.timestamp <= '2025-08-17' ? 'Not Updated' : career.timestamp}</td>
+                  <td>{career.timestamp}</td>
                 </tr>
               ))}
             </tbody>

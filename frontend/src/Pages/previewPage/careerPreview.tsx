@@ -63,6 +63,9 @@ interface CareerData {
   'pros and cons'?: ProsAndCons;
   pageUrl?: string;
   timestamp?: string;
+  isTemporary?: boolean;
+  originalId?: string;
+  createdAt?: string;
 }
 
 interface CareerPreviewProps {
@@ -114,7 +117,27 @@ const CareerPreview: React.FC<CareerPreviewProps> = ({
         setError(null);
         
         try {
-          // First check if we have preview data from editing session
+          // Check URL parameters to see if this is a temporary preview
+          const urlParams = new URLSearchParams(window.location.search);
+          const isTemp = urlParams.get('temp') === 'true';
+          
+          if (isTemp) {
+            // Fetch from temporary collection
+            const tempDocRef = doc(db, 'tempPreviewPages', currentSlug);
+            const tempDocSnap = await getDoc(tempDocRef);
+            
+            if (tempDocSnap.exists()) {
+              const tempData = { id: tempDocSnap.id, ...tempDocSnap.data() } as CareerData;
+              console.log('Using temporary preview data:', tempData);
+              setCareerData(tempData);
+              setLoading(false);
+              return;
+            } else {
+              console.warn('Temporary document not found, falling back to main collection');
+            }
+          }
+          
+          // First check if we have preview data from editing session (fallback)
           const previewData = sessionStorage.getItem('previewCareerData');
           if (previewData) {
             const parsedData = JSON.parse(previewData);
@@ -126,7 +149,7 @@ const CareerPreview: React.FC<CareerPreviewProps> = ({
             return;
           }
 
-          // If no preview data, fetch from Firebase
+          // If no preview data, fetch from Firebase main collection
           const docRef = doc(db, 'careerPages', currentSlug);
           const docSnap = await getDoc(docRef);
           
@@ -242,6 +265,10 @@ const CareerPreview: React.FC<CareerPreviewProps> = ({
   const importantFacts = processImportantFacts(careerData['Important Facts'] || '');
   const prosAndCons = careerData['pros and cons'] || { pros: [], cons: [] };
 
+  // Check if this is a temporary preview
+  const urlParams = new URLSearchParams(window.location.search);
+  const isTemporaryPreview = urlParams.get('temp') === 'true' || careerData?.isTemporary;
+
   const displayTitle = careerData.title || currentSlug?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Career Preview';
   const displayImage = careerData.bannerImage || careerData.summaryImageUrl || `https://via.placeholder.com/400x300/4F46E5/FFFFFF?text=${encodeURIComponent(displayTitle)}`;
 
@@ -266,7 +293,14 @@ const CareerPreview: React.FC<CareerPreviewProps> = ({
           {/* Back to Edit Button */}
           <button 
             className="btn btn-outline-primary"
-            onClick={() => navigate('/edit-careers', { state: { selectedCareer: currentSlug } })}
+            onClick={() => navigate('/edit-careers', { 
+              state: { 
+                selectedCareer: currentSlug,
+                fromPreview: true,
+                isTemporaryPreview: isTemporaryPreview,
+                originalId: careerData?.originalId || currentSlug
+              } 
+            })}
             title="Go back to edit this career page"
           >
             ✏️ Back to Edit
@@ -323,7 +357,22 @@ const CareerPreview: React.FC<CareerPreviewProps> = ({
         <main className="col-12 col-md-9">
           {/* Summary Section */}
           <section id="summary" className="mb-5">
-            <h1 className="mb-3">{displayTitle}</h1>
+            <div className="d-flex align-items-center gap-3 mb-3">
+              <h1 className="mb-0">{displayTitle}</h1>
+              {isTemporaryPreview && (
+                <span 
+                  className="badge bg-warning text-dark px-3 py-2"
+                  style={{ 
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  📝 Preview Mode - Unsaved Changes
+                </span>
+              )}
+            </div>
             <div className="row align-items-center">
               <div className="col-md-8">
                 <p>{careerData.summary || 'No summary available for this career.'}</p>
