@@ -9,6 +9,8 @@ import EditCareers from './Pages/EditCareers/EditCareers';
 import CareerLibrary from './Pages/CareerLibrary/CareerLibrary.tsx';
 import ApiHealth from './Pages/ApiHealth/ApiHealth';
 import PreviewPage from './Pages/previewPage/careerPreview.tsx';
+import TablePage from './Pages/TablePage/tablePage.tsx';
+import { DataProvider } from './contexts/DataContext';
 function parseLinks(links) {
   // Parse links into a nested structure: domain > section > career
   const tree = {};
@@ -171,6 +173,9 @@ function MainApp() {
         </button>
         <button className="btn btn-primary" onClick={() => navigate('/edit-careers')}>
           Edit Careers
+        </button>
+        <button className="btn btn-secondary" onClick={() => navigate('/table-page')}>
+          📊 Table Mapping
         </button>
       </div>
         <div className="col-md-3">
@@ -365,6 +370,11 @@ function App() {
         <Route path="/edit-careers" element={<EditCareers />} />
         <Route path="/career-library" element={<CareerLibrary />} />
         <Route path="/api-health" element={<ApiHealth />} />
+        <Route path="/table-page" element={
+          <DataProvider>
+            <TablePage />
+          </DataProvider>
+        } />
         <Route path="/preview-career" element={<PreviewPage />} />
         <Route path="/preview-career/:slug" element={<PreviewPage />} />
       </Routes>

@@ -15,7 +15,7 @@ const AIEnhancementModal = ({ isOpen, onClose, originalContent, onApply, fieldPa
   const [enhancedContent, setEnhancedContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-
+  // const category = careerCategory;
   // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
@@ -92,96 +92,96 @@ const AIEnhancementModal = ({ isOpen, onClose, originalContent, onApply, fieldPa
   const getEnhancementPrompts = (contentType, originalContent) => {
     const prompts = {
       'career summary': [
-        'Make this career summary more comprehensive and engaging',
-        'Add more specific details about the profession',
-        'Improve the professional tone and clarity',
-        'Include current industry trends and relevance'
+        `Make this career summary more comprehensive and engaging for ${careerTitle}`,
+        `Add more specific details about the profession for ${careerTitle}`,
+        `Improve the professional tone and clarity for ${careerTitle}`,
+        `Include current industry trends and relevance for ${careerTitle}`
       ],
       'career opportunity': [
-        'Expand on this career opportunity with specific details',
-        'Add salary ranges and growth prospects',
-        'Include required skills and qualifications',
-        'Make it more appealing to potential candidates'
+        `Expand on this career opportunity with specific details for ${careerTitle}`,
+        `Add salary ranges and growth prospects for ${careerTitle}`,
+        `Include required skills and qualifications for ${careerTitle}`,
+        `Make it more appealing to potential candidates for ${careerTitle}`
       ],
       'work description': [
-        'Make this work description more detailed and specific',
-        'Add technical skills and tools required',
-        'Include daily responsibilities and challenges',
-        'Improve professional language and structure'
+        `Make this work description more detailed and specific for ${careerTitle}`,
+        `Add technical skills and tools required for ${careerTitle}`,
+        `Include daily responsibilities and challenges for ${careerTitle}`,
+        `Improve professional language and structure for ${careerTitle}`
       ],
       'important facts': [
-        'Add more relevant and current facts',
-        'Include statistical data and market insights',
-        'Make the facts more compelling and informative',
-        'Add recent developments in the field'
+        `Add more relevant and current facts for ${careerTitle}`,
+        `Include statistical data and market insights for ${careerTitle}`,
+        `Make the facts more compelling and informative for ${careerTitle}`,
+        `Add recent developments in the field for ${careerTitle}`
       ],
       'educational stream': [
-        'Provide more specific educational requirements',
-        'Add alternative streams and pathways',
-        'Include minimum qualifications needed',
-        'Make the requirements clearer'
+        `Provide more specific educational requirements for ${careerTitle}`,
+        `Add alternative streams and pathways for ${careerTitle}`,
+        `Include minimum qualifications needed for ${careerTitle}`,
+        `Make the requirements clearer for ${careerTitle}`
       ],
       'graduation requirement': [
-        'Detail the graduation requirements more thoroughly',
-        'Add specific courses and specializations',
-        'Include duration and key subjects',
-        'Mention top universities offering this program'
+        `Detail the graduation requirements more thoroughly for ${careerTitle}`,
+        `Add specific courses and specializations for ${careerTitle}`,
+        `Include duration and key subjects for ${careerTitle}`,
+        `Mention top universities offering this program for ${careerTitle}`
       ],
       'post-graduation path': [
-        'Expand on post-graduation opportunities',
-        'Add specific advanced degree options',
-        'Include research and specialization areas',
-        'Mention career advancement possibilities'
+        `Expand on post-graduation opportunities for ${careerTitle}`,
+        `Add specific advanced degree options for ${careerTitle}`,
+        `Include research and specialization areas for ${careerTitle}`,
+        `Mention career advancement possibilities for ${careerTitle}`
       ],
       'exam elements': [
-        'Provide detailed exam syllabus breakdown',
-        'Add preparation tips and resources',
-        'Include exam pattern and scoring details',
-        'Mention difficulty level and success rates'
+        `Provide detailed exam syllabus breakdown for ${careerTitle}`,
+        `Add preparation tips and resources for ${careerTitle}`,
+        `Include exam pattern and scoring details for ${careerTitle}`,
+        `Mention difficulty level and success rates for ${careerTitle}`
       ],
       'professional advantages': [
-        'Add more compelling professional benefits',
-        'Include long-term career advantages',
-        'Mention work-life balance aspects',
-        'Add growth and learning opportunities'
+        `Add more compelling professional benefits for ${careerTitle}`,
+        `Include long-term career advantages for ${careerTitle}`,
+        `Mention work-life balance aspects for ${careerTitle}`,
+        `Add growth and learning opportunities for ${careerTitle}`
       ],
       'professional challenges': [
-        'Provide realistic career challenges',
-        'Include ways to overcome these challenges',
-        'Add industry-specific difficulties',
-        'Mention preparation strategies'
+        `Provide realistic career challenges for ${careerTitle}`,
+        `Include ways to overcome these challenges for ${careerTitle}`,
+        `Add industry-specific difficulties for ${careerTitle}`,
+        `Mention preparation strategies for ${careerTitle}`
       ],
       'institute name': [
-        'Improve the institute name formatting',
-        'Add full official name if abbreviated',
-        'Include accreditation details',
-        'Add ranking or reputation information'
+        `Improve the institute name formatting for ${careerTitle}`,
+        `Add full official name if abbreviated for ${careerTitle}`,
+        `Include accreditation details for ${careerTitle}`,
+        `Add ranking or reputation information for ${careerTitle}`
       ],
       'institute location': [
-        'Provide complete location details',
-        'Add city, state, and accessibility information',
-        'Include campus facilities information',
-        'Mention nearby landmarks or metro connectivity'
+        `Provide complete location details for ${careerTitle}`,
+        `Add city, state, and accessibility information for ${careerTitle}`,
+        `Include campus facilities information for ${careerTitle}`,
+        `Mention nearby landmarks or metro connectivity for ${careerTitle}`
       ],
       'examination name': [
-        'Provide full examination name and acronym',
-        'Add conducting body information',
-        'Include exam frequency and validity',
-        'Mention recognition and acceptance'
+        `Provide full examination name and acronym for ${careerTitle}`,
+        `Add conducting body information for ${careerTitle}`,
+        `Include exam frequency and validity for ${careerTitle}`,
+        `Mention recognition and acceptance for ${careerTitle}`
       ],
       'examination date': [
-        'Provide specific examination schedule',
-        'Add application deadlines',
-        'Include result declaration dates',
-        'Mention exam frequency (annual/bi-annual)'
+        `Provide specific examination schedule for ${careerTitle}`,
+        `Add application deadlines for ${careerTitle}`,
+        `Include result declaration dates for ${careerTitle}`,
+        `Mention exam frequency (annual/bi-annual) for ${careerTitle}`
       ]
     };
     
     return prompts[contentType] || [
-      'Improve the content quality and clarity',
-      'Add more specific and relevant details',
-      'Enhance professional language and tone',
-      'Make the content more comprehensive'
+      `Improve the content quality and clarity for ${careerTitle}`,
+      `Add more specific and relevant details for ${careerTitle}`,
+      `Enhance professional language and tone for ${careerTitle}`,
+      `Make the content more comprehensive for ${careerTitle}`
     ];
   };
 
@@ -310,35 +310,49 @@ const AIEnhancementModal = ({ isOpen, onClose, originalContent, onApply, fieldPa
                 Quick suggestions for {getContentType(fieldPath)}:
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                {getEnhancementPrompts(getContentType(fieldPath), originalContent).map((suggestion, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => setPrompt(suggestion)}
-                    style={{
-                      fontSize: '11px',
-                      padding: '4px 8px',
-                      backgroundColor: prompt === suggestion ? '#6366f1' : '#f3f4f6',
-                      color: prompt === suggestion ? 'white' : '#374151',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={e => {
-                      if (prompt !== suggestion) {
-                        e.target.style.backgroundColor = '#e5e7eb';
-                      }
-                    }}
-                    onMouseLeave={e => {
-                      if (prompt !== suggestion) {
-                        e.target.style.backgroundColor = '#f3f4f6';
-                      }
-                    }}
-                  >
-                    {suggestion}
-                  </button>
-                ))}
+                {getEnhancementPrompts(getContentType(fieldPath), originalContent).map((suggestion, index) => {
+                  const isSelected = prompt.split(', ').map(p => p.trim()).includes(suggestion);
+                  return (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => {
+                        const currentPrompts = prompt.split(', ').map(p => p.trim()).filter(p => p !== '');
+                        if (isSelected) {
+                          // Remove the suggestion if it's already selected
+                          const updatedPrompts = currentPrompts.filter(p => p !== suggestion);
+                          setPrompt(updatedPrompts.join(', '));
+                        } else {
+                          // Add the suggestion if it's not selected
+                          const updatedPrompts = [...currentPrompts, suggestion];
+                          setPrompt(updatedPrompts.join(', '));
+                        }
+                      }}
+                      style={{
+                        fontSize: '11px',
+                        padding: '4px 8px',
+                        backgroundColor: isSelected ? '#6366f1' : '#f3f4f6',
+                        color: isSelected ? 'white' : '#374151',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={e => {
+                        if (!isSelected) {
+                          e.target.style.backgroundColor = '#e5e7eb';
+                        }
+                      }}
+                      onMouseLeave={e => {
+                        if (!isSelected) {
+                          e.target.style.backgroundColor = '#f3f4f6';
+                        }
+                      }}
+                    >
+                      {suggestion}
+                    </button>
+                  );
+                })}
               </div>
             </div>
             
@@ -2117,7 +2131,7 @@ const EditCareers = () => {
           originalContent={aiModal.content}
           onApply={aiModal.onApply}
           fieldPath={aiModal.fieldPath}
-          careerTitle={selectedCareer}
+          careerTitle={selectedPage?.title || selectedCareer}
         />
 
         <ImageGenerationModal

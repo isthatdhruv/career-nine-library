@@ -20,8 +20,8 @@ const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
 const storage = getStorage(app);
-if (process.env.NODE_ENV === "development") {
-  connectFirestoreEmulator(db, "127.0.0.1", 8080);
-}
+// if (process.env.NODE_ENV === "development") {
+//   connectFirestoreEmulator(db, "0.0.0.0", 8080);
+// }
 
 export { app, db, storage };
