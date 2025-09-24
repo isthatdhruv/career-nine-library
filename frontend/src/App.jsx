@@ -9,8 +9,11 @@ import EditCareers from './Pages/EditCareers/EditCareers';
 import CareerLibrary from './Pages/CareerLibrary/CareerLibrary.tsx';
 import ApiHealth from './Pages/ApiHealth/ApiHealth';
 import PreviewPage from './Pages/previewPage/careerPreview.tsx';
+import CareerFinalPage from './Pages/FinalCareerPage/careerFinal.tsx';
+
 import TablePage from './Pages/TablePage/tablePage.tsx';
 import { DataProvider } from './contexts/DataContext';
+import Footer from './components/Footer.jsx';
 function parseLinks(links) {
   // Parse links into a nested structure: domain > section > career
   const tree = {};
@@ -398,10 +401,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<MainApp />} />
+        <Route path="/main-app" element={<MainApp />} />
         <Route path="/all-careers" element={<AllCareers />} />
         <Route path="/edit-careers" element={<EditCareers />} />
-        <Route path="/career-library" element={<CareerLibrary />} />
+        <Route path="/" element={<CareerLibrary />} />
         <Route path="/api-health" element={<ApiHealth />} />
         <Route path="/table-page" element={
           <DataProvider>
@@ -410,8 +413,10 @@ function App() {
         } />
         <Route path="/preview-career" element={<PreviewPage />} />
         <Route path="/preview-career/:slug" element={<PreviewPage />} />
+        <Route path="/career/:slug" element={<CareerFinalPage />} />
       </Routes>
     </Router>
+    
   );
 }
 

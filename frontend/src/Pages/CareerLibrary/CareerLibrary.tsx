@@ -3,6 +3,7 @@ import { FaChevronDown, FaTwitter, FaFacebookF, FaInstagram, FaLinkedinIn } from
 import { db } from "../../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import "./CareerLibrary.css";
+import Footer from "../../components/Footer";
 
 // Static categories based on the scraped URLs structure
 const categories = [
@@ -222,6 +223,7 @@ const CareerLibrary = () => {
   };
 
   const getCategoriesWithCareerCount = () => {
+    console.log(careers)
     const categoryCounts = {};
     careers.forEach(career => {
       categoryCounts[career.category] = (categoryCounts[career.category] || 0) + 1;
@@ -236,7 +238,7 @@ const CareerLibrary = () => {
   // Update filtered categories when careers, search term, or sort changes
   useEffect(() => {
     const categoryCounts = getCategoriesWithCareerCount();
-    
+    console.log('Category counts:', categoryCounts);
     let filtered = categories.filter(category => {
       // Only show categories that have careers
       const hasCareers = categoryCounts[category.slug] > 0;
@@ -258,7 +260,7 @@ const CareerLibrary = () => {
         return bCount - aCount;
       }
     });
-
+    console.log(filtered)
     setFilteredCategories(filtered);
   }, [searchTerm, sortBy, careers]);
 
@@ -363,6 +365,7 @@ const CareerLibrary = () => {
             </div>
             <div className="careers-grid">
               {getCareersByCategory(selectedCategory).map(career => (
+                
                 <div key={career.id} className="cl-card career-card">
                   <div className="cl-card-content">
                     <h3>{career.title}</h3>
@@ -372,7 +375,7 @@ const CareerLibrary = () => {
                         {career.summary.length > 150 ? '...' : ''}
                       </p>
                     )}
-                    <button className="learn-more-btn">Learn More</button>
+                    <a className="learn-more-btn" href={`/career/${career.id}`}>Learn More</a>
                   </div>
                 </div>
               ))}
@@ -416,33 +419,7 @@ const CareerLibrary = () => {
       </section>
 
       {/* Footer */}
-      <footer className="cl-footer">
-        <div className="footer-section">
-          <h3>Call Our Helpline</h3>
-          <p>Got career-related questions? Talk to our experts!</p>
-          <strong>+91 87449 87449</strong>
-        </div>
-        <div className="footer-section">
-          <h3>Subscribe to our Newsletter</h3>
-          <p>
-            Expert-written articles and everything else you need to choose the
-            right career, delivered weekly to your inbox.
-          </p>
-          <div className="subscribe-bar">
-            <input type="email" placeholder="Enter your email" />
-            <button>Subscribe</button>
-          </div>
-        </div>
-        <div className="footer-section">
-          <h3>Stay Connected</h3>
-          <div className="social-icons">
-            <FaTwitter />
-            <FaFacebookF />
-            <FaInstagram />
-            <FaLinkedinIn />
-          </div>
-        </div>
-      </footer>
+    <Footer></Footer>
     </div>
   );
 };
