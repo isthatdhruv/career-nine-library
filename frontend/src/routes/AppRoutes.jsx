@@ -11,6 +11,7 @@ import PreviewPage from "../Pages/previewPage/careerPreview.tsx";
 import CareerFinalPage from "../Pages/FinalCareerPage/careerFinal.tsx";
 import TablePage from "../Pages/TablePage/tablePage.tsx";
 import { DataProvider } from "../contexts/DataContext";
+import CareerCategoryPage from "../Pages/CareerCategoryPage/CareerCategoryPage.tsx";
 
 const AppRoutes = () => {
   return (
@@ -31,6 +32,7 @@ const AppRoutes = () => {
       <Route path="/preview-career" element={<PreviewPage />} />
       <Route path="/preview-career/:slug" element={<PreviewPage />} />
       <Route path="/career/:slug" element={<CareerFinalPage />} />
+      <Route path="/category" element={<CareerCategoryPage />} />
     </Routes>
   );
 };

@@ -124,7 +124,6 @@ const CareerLibrary = () => {
                 {/* Career Category Cards */}
                 <div className="row g-4">
                     {sortedCareers.map((career, index) => (
-                        
                         <div key={index} className="col-12 col-sm-6 col-lg-4">
                             <div 
                                 className="card h-100 border-0 shadow-sm position-relative overflow-hidden career-card"
@@ -133,22 +132,40 @@ const CareerLibrary = () => {
                                 }}
                                 style={{ 
                                     cursor: 'pointer',
-                                    minHeight: '250px',
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                    minHeight: '250px'
+                                    // Removed the inline background style - now handled by CSS class
                                 }}
                             >
+                                {/* Career Image */}
+                                <img
+                                    src={`/${career.toLowerCase().replace(/\s+/g, '-').replace(/&/g, 'and')}.png`}
+                                    className="card-img career-image"
+                                    alt={career}
+                                    onError={(e) => {
+                                        // Hide image and show gradient background if image fails to load
+                                        e.currentTarget.style.display = 'none';
+                                    }}
+                                    onLoad={(e) => {
+                                        // Hide the placeholder icon when image loads successfully
+                                        const placeholderIcon = e.currentTarget.parentElement?.querySelector('.placeholder-icon');
+                                        if (placeholderIcon) {
+                                            (placeholderIcon as HTMLElement).style.display = 'none';
+                                        }
+                                    }}
+                                />
+                                
                                 <div className="card-img-overlay d-flex align-items-end p-0">
                                     <div className="w-100 text-center p-4" style={{
                                         background: 'linear-gradient(transparent, rgba(0,0,0,0.8))'
                                     }}>
                                         <h5 className="card-title text-white fw-bold mb-0">
-                                            {career}
+                                            {career.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                                         </h5>
                                     </div>
                                 </div>
                                 
-                                {/* Placeholder Icon */}
-                                <div className="position-absolute top-50 start-50 translate-middle">
+                                {/* Placeholder Icon - shown when no image */}
+                                <div className="position-absolute top-50 start-50 translate-middle placeholder-icon">
                                     <i className="bi bi-briefcase" style={{
                                         fontSize: '4rem',
                                         color: 'rgba(255,255,255,0.3)'
