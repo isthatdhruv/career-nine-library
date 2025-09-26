@@ -5,6 +5,7 @@ import "./CareerLibrary.css";
 import { db } from "../../firebase";
 import { collection, doc, getDoc } from "firebase/firestore";
 import Section from "../../components/Section/Section.tsx";
+import { useNavigate } from "react-router-dom"; // Add this import
 
 
 
@@ -17,7 +18,7 @@ const CareerLibrary = () => {
     const [careerList, setCareerList] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState<'name' | 'popularity'>('name');
-
+    const navigate = useNavigate(); // Initialize useNavigate
     useEffect(() => {
         const fetchCareers = async () => {
             try {
@@ -61,6 +62,17 @@ const CareerLibrary = () => {
         fetchCareers();
     }, []);
 
+    const createSlug = (careerName: string): string => {
+        return careerName
+            .toLowerCase()
+            
+    };
+
+    // Handle card click navigation
+    const handleCardClick = (career: string) => {
+        const slug = createSlug(career);
+        navigate(`/${slug}`);
+    };
 
     const filteredCareers = careers.filter(career =>
         career.toLowerCase().includes(searchTerm.toLowerCase())
@@ -128,7 +140,7 @@ const CareerLibrary = () => {
                             <div 
                                 className="card h-100 border-0 shadow-sm position-relative overflow-hidden career-card"
                                 onClick={() => {
-                                    console.log(`Navigate to ${career} category`);
+                                   handleCardClick(career);
                                 }}
                                 style={{ 
                                     cursor: 'pointer',

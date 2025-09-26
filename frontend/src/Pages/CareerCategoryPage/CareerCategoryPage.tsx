@@ -5,6 +5,17 @@ import Section from "../../components/Section/Section.tsx";
 // Add this import at the top of CareerCategoryPage.tsx
 import "./CareerCategoryPage.css";
 const CareerCategoryPage = () => {
+
+  const category = new URLSearchParams(window.location.search).get('/*');
+  console.log("Category from URL:", category);
+
+
+
+
+
+
+
+
   return (
     <div className="container-fluid d-flex flex-column min-vh-100 p-0">
       <Header />
