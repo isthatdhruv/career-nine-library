@@ -8,16 +8,7 @@ const Header = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleLogin = () => {
-    // Add login logic here
-    console.log('Login clicked');
-  };
-
-  const handleRegister = () => {
-    // Add register logic here
-    console.log('Register now clicked');
-  };
-
+  
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
       <div className="container-fluid px-3 px-lg-5">
@@ -83,23 +74,25 @@ const Header = () => {
 
           {/* Action Buttons */}
           <div className="d-flex gap-2 ms-auto">
-            <button 
-              className="btn btn-outline-dark px-4 py-2 fw-semibold"
-              onClick={handleLogin}
-            >
-              Log In
-            </button>
-            <button 
-              className="btn btn-success  px-4 py-2 fw-semibold"
-              style={{
-                background: 'linear-gradient(45deg, #1abc9c, #16a085)',
-                border: 'none',
-                boxShadow: '0 2px 10px rgba(26, 188, 156, 0.3)'
-              }}
-              onClick={handleRegister}
-            >
-              Register now
-            </button>
+            <a href="https://career-9.com/sign-up/">
+              <button 
+                className="btn btn-outline-dark px-4 py-2 fw-semibold"
+              >
+                Log In
+              </button>
+            </a>
+            <a href="https://career-9.com/sign-up/">
+              <button 
+                className="btn btn-success  px-4 py-2 fw-semibold"
+                style={{
+                  background: 'linear-gradient(45deg, #1abc9c, #16a085)',
+                  border: 'none',
+                  boxShadow: '0 2px 10px rgba(26, 188, 156, 0.3)'
+                }}
+              >
+                Register now
+              </button>
+            </a>
           </div>
         </div>
       </div>
