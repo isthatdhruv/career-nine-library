@@ -23,7 +23,7 @@ const Header = () => {
       <div className="container-fluid px-3 px-lg-5">
         
         {/* Logo Section */}
-        <Link className="navbar-brand d-flex align-items-center " to="/">
+        <Link className="navbar-brand d-flex align-items-center " to="https://career-9.com/">
           <img style={{maxHeight: '70px', borderRadius: '0px'}}
             src="/logo.png" 
             alt="Career-9" 
@@ -50,32 +50,32 @@ const Header = () => {
           {/* Center Navigation Links */}
           <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
             <li className="nav-item mx-2">
-              <Link className="nav-link fw-large text-dark px-3 py-2" to="/mission">
+              <Link className="nav-link fw-large text-dark px-3 py-2" src="/mission">
                 Our Mission
               </Link>
             </li>
             <li className="nav-item mx-2">
-              <Link className="nav-link fw-medium text-dark px-3 py-2" to="/why-career-9">
+              <Link className="nav-link fw-medium text-dark px-3 py-2" to="https://career-9.com/#why-career-9">
                 Why Career-9?
               </Link>
             </li>
             <li className="nav-item mx-2">
-              <Link className="nav-link fw-medium text-dark px-3 py-2" to="/solution">
+              <Link className="nav-link fw-medium text-dark px-3 py-2" to="https://career-9.com/#our-solution">
                 Our Solution
               </Link>
             </li>
             <li className="nav-item mx-2">
-              <Link className="nav-link fw-medium text-dark px-3 py-2" to="/testimonials">
+              <Link className="nav-link fw-medium text-dark px-3 py-2" to="https://career-9.com/#testimonials">
                 Testimonials
               </Link>
             </li>
             <li className="nav-item mx-2">
-              <Link className="nav-link fw-medium text-dark px-3 py-2" to="/team">
+              <Link className="nav-link fw-medium text-dark px-3 py-2" to="https://career-9.com/#our-team">
                 Our Team
               </Link>
             </li>
             <li className="nav-item mx-2">
-              <Link className="nav-link fw-medium text-dark px-3 py-2" to="/blogs">
+              <Link className="nav-link fw-medium text-dark px-3 py-2" to="https://career-9.com/#Blog">
                 Blogs
               </Link>
             </li>
