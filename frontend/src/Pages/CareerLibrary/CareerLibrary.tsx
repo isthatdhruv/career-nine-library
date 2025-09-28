@@ -5,6 +5,7 @@ import "./CareerLibrary.css";
 import { db } from "../../firebase";
 import { collection, doc, getDoc } from "firebase/firestore";
 import Section from "../../components/Section/Section.tsx";
+import { useNavigate } from "react-router-dom"; // Add this import
 
 
 
@@ -17,13 +18,14 @@ const CareerLibrary = () => {
     const [careerList, setCareerList] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState<'name' | 'popularity'>('name');
-
+    const navigate = useNavigate(); // Initialize useNavigate
     useEffect(() => {
         const fetchCareers = async () => {
             try {
                 const mappingDoc = doc(collection(db, 'mappingSchema'), 'mapping');
                 const mappingDocSnap = await getDoc(mappingDoc);
-
+                localStorage.setItem('careerMapping', JSON.stringify(mappingDocSnap.data()));
+                
                 const data = mappingDocSnap.data();
                 if (data) {
                     
@@ -61,6 +63,17 @@ const CareerLibrary = () => {
         fetchCareers();
     }, []);
 
+    const createSlug = (careerName: string): string => {
+        return careerName
+            .toLowerCase()
+            
+    };
+
+    // Handle card click navigation
+    const handleCardClick = (career: string) => {
+        const slug = createSlug(career);
+        navigate(`/${slug}`);
+    };
 
     const filteredCareers = careers.filter(career =>
         career.toLowerCase().includes(searchTerm.toLowerCase())
@@ -124,31 +137,48 @@ const CareerLibrary = () => {
                 {/* Career Category Cards */}
                 <div className="row g-4">
                     {sortedCareers.map((career, index) => (
-                        
                         <div key={index} className="col-12 col-sm-6 col-lg-4">
                             <div 
                                 className="card h-100 border-0 shadow-sm position-relative overflow-hidden career-card"
                                 onClick={() => {
-                                    console.log(`Navigate to ${career} category`);
+                                   handleCardClick(career);
                                 }}
                                 style={{ 
                                     cursor: 'pointer',
-                                    minHeight: '250px',
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                    minHeight: '250px'
+                                    // Removed the inline background style - now handled by CSS class
                                 }}
                             >
+                                {/* Career Image */}
+                                <img
+                                    src={`/${career.toLowerCase().replace(/\s+/g, '-').replace(/&/g, 'and')}.png`}
+                                    className="card-img career-image"
+                                    alt={career}
+                                    onError={(e) => {
+                                        // Hide image and show gradient background if image fails to load
+                                        e.currentTarget.style.display = 'none';
+                                    }}
+                                    onLoad={(e) => {
+                                        // Hide the placeholder icon when image loads successfully
+                                        const placeholderIcon = e.currentTarget.parentElement?.querySelector('.placeholder-icon');
+                                        if (placeholderIcon) {
+                                            (placeholderIcon as HTMLElement).style.display = 'none';
+                                        }
+                                    }}
+                                />
+                                
                                 <div className="card-img-overlay d-flex align-items-end p-0">
                                     <div className="w-100 text-center p-4" style={{
                                         background: 'linear-gradient(transparent, rgba(0,0,0,0.8))'
                                     }}>
                                         <h5 className="card-title text-white fw-bold mb-0">
-                                            {career}
+                                            {career.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                                         </h5>
                                     </div>
                                 </div>
                                 
-                                {/* Placeholder Icon */}
-                                <div className="position-absolute top-50 start-50 translate-middle">
+                                {/* Placeholder Icon - shown when no image */}
+                                <div className="position-absolute top-50 start-50 translate-middle placeholder-icon">
                                     <i className="bi bi-briefcase" style={{
                                         fontSize: '4rem',
                                         color: 'rgba(255,255,255,0.3)'

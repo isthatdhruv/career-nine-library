@@ -108,6 +108,40 @@ cl-search-bar.input{
     background-color: #e55a2b;
 }
 
+/* Career card styles */
+.career-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: linear-gradient(135deg, #2c3e50 0%, #000000 100%) !important;
+}
+
+.career-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.25) !important;
+}
+
+.career-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    transition: transform 0.3s ease;
+}
+
+.career-card:hover .career-image {
+    transform: scale(1.05);
+}
+
+.card-img-overlay {
+    z-index: 2;
+}
+
+.placeholder-icon {
+    z-index: 1;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .search-title {
@@ -126,5 +160,15 @@ cl-search-bar.input{
     
     .search-button {
         border-top: 1px solid #ddd;
+    }
+    
+    .career-card {
+        min-height: 200px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .career-card {
+        min-height: 180px !important;
     }
 }
