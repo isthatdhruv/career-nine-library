@@ -24,7 +24,8 @@ const CareerLibrary = () => {
             try {
                 const mappingDoc = doc(collection(db, 'mappingSchema'), 'mapping');
                 const mappingDocSnap = await getDoc(mappingDoc);
-
+                localStorage.setItem('careerMapping', JSON.stringify(mappingDocSnap.data()));
+                
                 const data = mappingDocSnap.data();
                 if (data) {
                     

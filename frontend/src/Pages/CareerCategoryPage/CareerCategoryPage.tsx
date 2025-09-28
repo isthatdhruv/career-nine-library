@@ -1,33 +1,51 @@
-import React from "react";
+import React, { use, useEffect } from "react";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer";
 import Section from "../../components/Section/Section.tsx";
-// Add this import at the top of CareerCategoryPage.tsx
 import "./CareerCategoryPage.css";
+import { useParams } from "react-router";
+import { doc, collection, getDoc } from "firebase/firestore";
+import { db } from "../../firebase.js";
+
 const CareerCategoryPage = () => {
+  const { category } = useParams<{ category?: string }>();
+  const [description, setDescription] = React.useState<string>("");
 
-  const category = new URLSearchParams(window.location.search).get('/*');
-  console.log("Category from URL:", category);
+  
+  useEffect(() => {
+    window.scrollTo(0, 0); // Scroll to top when component mounts
+    const fetchMapping = async () => {
+      const temp = doc(collection(db, 'categoryDescription'), 'description');
+      const DescriptionSnap = await getDoc(temp);
+      const descriptionData = DescriptionSnap.data();
+      
+      const desc = descriptionData ? descriptionData[category as string] : "Description not available.";
+      setDescription(desc);
 
 
 
+    };
 
-
-
-
+    fetchMapping();
+  }, []);
 
   return (
     <div className="container-fluid d-flex flex-column min-vh-100 p-0">
       <Header />
       <Section />
+
       {/* Main Content Section */}
       <div className="container my-5 flex-grow-1">
         {/* Title and Dropdown Section */}
-        <div className="row mb-4">
-          <div className="col-md-8">
-            <h2 className="fw-bold text-dark mb-0">Computer Application & IT</h2>
+        <div className="row mb-2 align-items-start align-items-lg-center">
+          <div className="col-12 col-lg-8 order-2 order-lg-1">
+            <h2 className="category-title fw-bold text-dark mb-0 text-start">
+              {category
+                ? category.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+                : "Category"}
+            </h2>
           </div>
-          <div className="col-md-4 text-md-end">
+          <div className="col-12 col-lg-4 text-start text-lg-end order-1 order-lg-2 mb-2 mb-lg-0">
             <div className="dropdown">
               <button
                 className="btn btn-outline-secondary dropdown-toggle px-4"
@@ -50,32 +68,18 @@ const CareerCategoryPage = () => {
           </div>
         </div>
 
+        {/* Dark break line */}
+        <div className="row mb-3">
+          <div className="col-12">
+            <hr className="category-divider" />
+          </div>
+        </div>
+
         {/* Description Section */}
         <div className="row mb-5">
           <div className="col-12">
-            <div className="text-muted lh-lg" style={{ fontSize: '1rem' }}>
-              <p className="mb-3">
-                In today's techno-savvy world, no industry survives without adopting the latest technology & hence graduates in the field of computer applications are always in demand.
-                Bachelors in the computer application is a mainstream career option and a very sought-after course amongst students. A degree in computer application creates
-                substantial scope for an excellent career.
-              </p>
-
-              <p className="mb-3">
-                Entry to premier colleges requires students to pass an entrance exam. Considering the fast pace growth of this sector, lots of students are pursuing this career path thus
-                making it increasingly competitive. Graduates in this field need to constantly upgrade their skill set to keep up with the rapidly changing technology. For a career in
-                Computer Application one can do BCA, a three year bachelor program and follow it up with MCA, a masters program. While its imperative to have Mathematics at 10+2
-                level, it's also recommended that the candidate chooses a combination of Science (Physics, Chemistry, Maths) with Computer Science as it increases the odds of grasping
-                concepts faster.
-              </p>
-
-              <p className="mb-3">
-                While demand for Computer Application Graduates is becoming sector agnostic, companies like Accenture, TCS, TechMahindra, IGATE and StartUps like Flipkart & UBER
-                continue to be the top recruiters.
-              </p>
-
-              <p className="mb-4">
-                <strong>Trending fields:</strong> Web/ Mobile Design Engineer, Web/ Mobile App Developer, UI/UX Designers, Technical Writers
-              </p>
+            <div className="category-description mt-0 text-muted lh-lg text-start" style={{ fontSize: '1rem' }}>
+              {description}
             </div>
           </div>
         </div>
