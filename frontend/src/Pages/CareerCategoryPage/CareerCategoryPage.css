@@ -1,0 +1,105 @@
+/* Remove any ::after pseudo-element from all h2 tags in this component */
+h2{
+    padding-bottom: 0 !important;
+}
+
+h2::after {
+    display: none !important;
+    content: none !important;
+    border: none !important;
+    background: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-bottom: none !important;
+}
+
+/* More specific targeting */
+.container h2::after,
+.row h2::after,
+.col-md-8 h2::after {
+    display: none !important;
+    content: none !important;
+    border: none !important;
+    background: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-bottom: none !important;
+}
+
+/* Target the specific h2 element */
+.fw-bold.text-dark::after {
+    display: none !important;
+    content: none !important;
+    border: none !important;
+    background: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-bottom: none !important;
+}
+
+/* Override any global h2 styles */
+.container-fluid h2::after {
+    display: none !important;
+    content: none !important;
+    border: none !important;
+    background: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-bottom: none !important;
+}
+
+/* Remove any ::after pseudo-element from category title */
+.category-title::after {
+    display: none !important;
+    content: none !important;
+    border: none !important;
+    background: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-bottom: none !important;
+}
+
+.category-title::before {
+    display: none !important;
+    content: none !important;
+    border: none !important;
+    background: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-bottom: none !important;
+}
+
+/* Dark break line styling */
+.category-divider {
+    border: none;
+    height: 1px;
+    background-color: #dee2e6;
+    margin: 0;
+    opacity: 1;
+}
+
+/* Description text styling - left aligned */
+.category-description {
+    text-align: left !important;
+}
+
+/* Career card hover effects */
+.career-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.career-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .category-description {
+        font-size: 0.9rem !important;
+    }
+    
+    .career-card {
+        min-height: 200px !important;
+    }
+}
