@@ -349,7 +349,64 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Responsive tweaks */
+/* Main content with header adjustment */
+.main-content-with-header {
+  padding-top: 120px; /* Body content padding */
+  margin-top: -20px; /* Fine-tune if needed */
+}
+
+/* Fix sidebar navigation to account for fixed header */
+.sidebar-nav {
+  padding-top: 120px; /* Same as main content */
+  position: sticky;
+  top: 100px; /* Stick below the header */
+  height: fit-content;
+}
+
+.sidebar-nav .nav {
+  padding-top: 20px; /* Additional spacing */
+}
+.container{
+  margin-top: 10px;
+}
+
+/* Prevent footer glitch with minimum content height */
+.career-content-container {
+  min-height: 800px;
+  transition: min-height 0.3s ease;
+}
+
+/* Loading skeleton styles */
+.placeholder {
+  background-color: #f8fafc;
+  border-radius: 0.375rem;
+  animation: placeholder-glow 2s ease-in-out infinite alternate;
+}
+
+.placeholder-glow .placeholder {
+  animation: placeholder-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes placeholder-glow {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Ensure sections have minimum height */
+section {
+  min-height: 100px;
+}
+
+/* Main content minimum height */
+main.col-md-9 {
+  min-height: 600px;
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .sidebar, .nav.nav-pills {
     margin-bottom: 2rem;
@@ -366,6 +423,21 @@ a:hover {
   }
   .table-responsive {
     font-size: 0.875rem;
+  }
+  .main-content-with-header,
+  .sidebar-nav {
+    padding-top: 100px;
+  }
+  
+  .sidebar-nav {
+    top: 80px;
+  }
+  .career-content-container {
+    min-height: 600px;
+  }
+  
+  main.col-md-9 {
+    min-height: 400px;
   }
 }
 
@@ -424,3 +496,9 @@ section {
     margin-bottom: 2rem;
   }
 }
+
+/* Smooth scrolling for anchor links */
+html {
+  scroll-padding-top: 140px; /* Ensures anchor links don't hide behind header */
+}
+
