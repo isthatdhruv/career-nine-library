@@ -75,7 +75,10 @@ const CareerLibrary = () => {
         navigate(`/${slug}`);
     };
 
-    const filteredCareers = careers.filter(career =>
+    // Exclude the 'uncategorized' category from display
+    const displayCareers = careers.filter(career => career.toLowerCase() !== 'uncategorized');
+
+    const filteredCareers = displayCareers.filter(career =>
         career.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -116,7 +119,7 @@ const CareerLibrary = () => {
                 {/* Stats and Sort Section */}
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <span className="career-stats">
-                        Explore {careerList.length} career options from {careers.length} Career Categories.
+                        Explore {careerList.length} career options from {displayCareers.length} Career Categories.
                     </span>
                     <div className="sort-options">
                         <span className="me-3">Sort By:</span>
