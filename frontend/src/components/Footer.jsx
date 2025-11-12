@@ -51,7 +51,7 @@ return (
               Call Us
             </h6>
             <p className="mb-0" style={{ color: '#a0a0a0', fontSize: '1.1rem' }}>
-              +91 9392273379
+              +91 7000070256
             </p>
           </div>
 
@@ -61,36 +61,53 @@ return (
               Social Media
             </h6>
             <div className="d-flex gap-3">
-              <div 
-                className="d-flex align-items-center justify-content-center"
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  backgroundColor: '#4a6b68',
-                  borderRadius: '50%',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.3s ease'
-                }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#5a7b78'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#4a6b68'}
+              <a
+                href="https://www.facebook.com/people/Career-9/61567696780160/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none' }}
+                aria-label="Career-9 Facebook"
               >
-                <FaFacebookF style={{ color: '#ffffff', fontSize: '16px' }} />
-              </div>
-              <div 
-                className="d-flex align-items-center justify-content-center"
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  backgroundColor: '#4a6b68',
-                  borderRadius: '50%',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.3s ease'
-                }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#5a7b78'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#4a6b68'}
+                <div
+                  className="d-flex align-items-center justify-content-center"
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    backgroundColor: '#4a6b68',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5a7b78'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4a6b68'}
+                >
+                  <FaFacebookF style={{ color: '#ffffff', fontSize: '16px' }} />
+                </div>
+              </a>
+
+              <a
+                href="https://www.instagram.com/career_9_?igsh=MTNtd3lmcXh4cW4weQ%3D%3D"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none' }}
+                aria-label="Career-9 Instagram"
               >
-                <FaInstagram style={{ color: '#ffffff', fontSize: '16px' }} />
-              </div>
+                <div
+                  className="d-flex align-items-center justify-content-center"
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    backgroundColor: '#4a6b68',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5a7b78'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4a6b68'}
+                >
+                  <FaInstagram style={{ color: '#ffffff', fontSize: '16px' }} />
+                </div>
+              </a>
             </div>
           </div>
         </div>
