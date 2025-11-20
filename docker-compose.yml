@@ -1,10 +1,27 @@
 version: '3.8'
 
 services:
-  web:
+  nginx:
     image: nginx:alpine
     volumes:
-      - ./build:/usr/share/nginx/html
+      - ./frontend/build:/usr/share/nginx/html
       - ./build/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
     ports:
       - "80:80"
+      - "443:443"
+    networks:
+      - frontend
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    networks:
+      - frontend
+
+networks:
+  frontend:
+    external: true
