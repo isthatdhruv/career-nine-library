@@ -19,196 +19,213 @@ const Footer = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Form submitted:', formData);
-    // Add form submission logic here
   };
 
-return (
-  <footer 
-    style={{
-      backgroundColor: '#162622',
-      color: '#ffffff',
-      padding: '40px 0 0 0',
-      maxHeight: 'none'
-    }}
-  >
-    <div className="container-fluid px-4 px-lg-5">
-      <div className="row" >
-        {/* Left Section - Contact Info */}
-        <div className="col-lg-6 col-md-6 mb-4 " style={{backgroundColor: '#0d1a16', padding: '80px', maxWidth: '800px', borderRadius: '8px'}}>
-          {/* Send Us an Email */}
-          <div className="mb-4" >
-            <h6 className="text-white mb-2" style={{ fontSize: '2.1rem', fontWeight: '600' }}>
-              Send Us an Email
-            </h6>
-            <p className="mb-0" style={{ color: '#a0a0a0', fontSize: '1.1rem' }}>
-              support@career-9.com
-            </p>
-          </div>
+  return (
+    <footer
+      style={{
+        background: "#0E1F1C",
+        padding: "80px 0",
+        color: "#fff",
+      }}
+    >
+      <div className="container-fluid px-4 px-lg-5">
+        {/* Use Bootstrap's grid without forcing display:flex on the row.
+            This keeps the two columns side-by-side on large screens. */}
+        <div className="row g-4" style={{ alignItems: "stretch" }}>
+          {/* LEFT SECTION */}
+          <div
+            className="col-lg-6 col-md-6"
+            style={{
+              background: "#081512",
+              padding: "60px",
+              borderRadius: "25px",
+              minHeight: "400px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>
+              <h3 style={{ fontSize: "32px", marginBottom: "20px", color: "#ffffff" }}>
+                Send Us an Email
+              </h3>
+              <p style={{ color: "#ffffff", fontSize: "20px", marginTop: 0 }}>
+                support@career-9.com
+              </p>
+            </div>
 
-          {/* Call Us */}
-          <div className="mb-4">
-            <h6 className="text-white mb-2" style={{ fontSize: '2.1rem', fontWeight: '600' }}>
-              Call Us
-            </h6>
-            <p className="mb-0" style={{ color: '#a0a0a0', fontSize: '1.1rem' }}>
-              +91 7000070256
-            </p>
-          </div>
+            <div>
+              <h3 style={{ fontSize: "32px", marginBottom: "20px", color: "#ffffff" }}>
+                Call Us
+              </h3>
+              <p style={{ color: "#bfbfbf", fontSize: "20px", marginTop: 0 }}>
+                +91 7000070256
+              </p>
+            </div>
 
-          {/* Social Media */}
-          <div className="mb-4">
-            <h6 className="text-white mb-3" style={{ fontSize: '2.1rem', fontWeight: '600' }}>
-              Social Media
-            </h6>
-            <div className="d-flex gap-3">
-              <a
-                href="https://www.facebook.com/people/Career-9/61567696780160/"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ textDecoration: 'none' }}
-                aria-label="Career-9 Facebook"
-              >
-                <div
-                  className="d-flex align-items-center justify-content-center"
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    backgroundColor: '#4a6b68',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5a7b78'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4a6b68'}
+            <div>
+              <h3 style={{ fontSize: "32px", marginBottom: "20px", color: "#ffffff" }}>
+                Social Media
+              </h3>
+              <div className="d-flex gap-4">
+                <a
+                  href="https://www.facebook.com/people/Career-9/61567696780160/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Career-9 Facebook"
+                  style={{ textDecoration: "none" }}
                 >
-                  <FaFacebookF style={{ color: '#ffffff', fontSize: '16px' }} />
-                </div>
-              </a>
+                  <div
+                    style={{
+                      width: "55px",
+                      height: "55px",
+                      background: "#E5E7EB",
+                      borderRadius: "50%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <FaFacebookF color="#000" size={22} />
+                  </div>
+                </a>
 
-              <a
-                href="https://www.instagram.com/career_9_?igsh=MTNtd3lmcXh4cW4weQ%3D%3D"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ textDecoration: 'none' }}
-                aria-label="Career-9 Instagram"
-              >
-                <div
-                  className="d-flex align-items-center justify-content-center"
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    backgroundColor: '#4a6b68',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5a7b78'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4a6b68'}
+                <a
+                  href="https://www.instagram.com/career_9_?igsh=MTNtd3lmcXh4cW4weQ%3D%3D"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Career-9 Instagram"
+                  style={{ textDecoration: "none" }}
                 >
-                  <FaInstagram style={{ color: '#ffffff', fontSize: '16px' }} />
-                </div>
-              </a>
+                  <div
+                    style={{
+                      width: "55px",
+                      height: "55px",
+                      background: "#E5E7EB",
+                      borderRadius: "50%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <FaInstagram color="#000" size={24} />
+                  </div>
+                </a>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Right Section - Registration Form */}
-        <div className="col-lg-6 col-md-6" style={{margin:'35px', padding: '35px', maxWidth: '800px', borderRadius: '8px'}}>
-          <div>
-            <h5 className="text-white mb-4" style={{ fontSize: '1.3rem', fontWeight: '600' }}>
+          {/* RIGHT SECTION */}
+          <div
+            className="col-lg-6 col-md-6"
+            style={{
+              background: "#081512",
+              padding: "60px",
+              borderRadius: "25px",
+              minHeight: "400px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-start",
+              background: "transparent", 
+              boxShadow: "none"
+            }}
+          >
+            <h2 style={{ fontSize: "36px", marginBottom: "40px", color: "#ffffff" }}>
               Register Now
-            </h5>
-            
-            <form onSubmit={handleSubmit}>
-              <div className="row mb-3">
-                <div className="col-md-6 mb-3">
-                  <label className="form-label text-white" style={{ fontSize: '0.85rem', marginBottom: '6px', fontWeight: '500' }}>
-                    Full Name <span style={{ color: '#ff6b6b' }}>*</span>
+            </h2>
+
+            <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+              <div className="row mb-4">
+                <div className="col-12 col-md-6 mb-4">
+                  <label style={{ fontSize: "16px", color: "#ffffff" }}>
+                    Full Name <span style={{ color: "#00E9B6" }}>*</span>
                   </label>
                   <input
                     type="text"
                     name="fullName"
-                    className="form-control"
-                    placeholder="Please Enter your Name"
+                    placeholder="Full Name"
                     value={formData.fullName}
                     onChange={handleInputChange}
                     required
                     style={{
-                      backgroundColor: '#2a403c',
-                      border: '1px solid #3a504c',
-                      borderRadius: '8px',
-                      padding: '10px 14px',
-                      color: '#ffffff',
-                      fontSize: '0.9rem',
-                      height: '45px'
+                      width: "100%",
+                      background: "#20312E",
+                      border: "none",
+                      padding: "18px",
+                      borderRadius: "15px",
+                      marginTop: "6px",
+                      color: "#fff",
+                      fontSize: "17px",
                     }}
                   />
                 </div>
-                <div className="col-md-6 mb-3">
-                  <label className="form-label text-white" style={{ fontSize: '0.85rem', marginBottom: '6px', fontWeight: '500' }}>
-                    Phone Number <span style={{ color: '#ff6b6b' }}>*</span>
+
+                <div className="col-12 col-md-6 mb-4">
+                  <label style={{ fontSize: "16px", color: "#ffffff" }}>
+                    Phone Number <span style={{ color: "#00E9B6" }}>*</span>
                   </label>
                   <input
                     type="tel"
                     name="phoneNumber"
-                    className="form-control"
-                    placeholder="Please Enter Your Phone Number"
+                    placeholder="Phone Number"
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
                     required
                     style={{
-                      backgroundColor: '#2a403c',
-                      border: '1px solid #3a504c',
-                      borderRadius: '8px',
-                      padding: '10px 14px',
-                      color: '#ffffff',
-                      fontSize: '0.9rem',
-                      height: '45px'
+                      width: "100%",
+                      background: "#20312E",
+                      border: "none",
+                      padding: "18px",
+                      borderRadius: "15px",
+                      marginTop: "6px",
+                      color: "#fff",
+                      fontSize: "17px",
                     }}
                   />
                 </div>
               </div>
-              
+
               <div className="mb-4">
-                <label className="form-label text-white" style={{ fontSize: '0.85rem', marginBottom: '6px', fontWeight: '500' }}>
-                  Email <span style={{ color: '#ff6b6b' }}>*</span>
+                <label style={{ fontSize: "16px", color: "#ffffff" }}>
+                  Email <span style={{ color: "#00E9B6" }}>*</span>
                 </label>
                 <input
                   type="email"
                   name="email"
-                  className="form-control"
-                  placeholder="Please Enter Your Email Address"
+                  placeholder="Email"
                   value={formData.email}
                   onChange={handleInputChange}
                   required
                   style={{
-                    backgroundColor: '#2a403c',
-                    border: '1px solid #3a504c',
-                    borderRadius: '8px',
-                    padding: '10px 14px',
-                    color: '#ffffff',
-                    fontSize: '0.9rem',
-                    height: '45px'
+                    width: "100%",
+                    background: "#20312E",
+                    border: "none",
+                    padding: "18px",
+                    borderRadius: "15px",
+                    marginTop: "6px",
+                    color: "#fff",
+                    fontSize: "17px",
                   }}
                 />
               </div>
 
               <button
                 type="submit"
-                className="btn w-100"
                 style={{
-                  backgroundColor: '#00d4aa',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '12px 20px',
-                  color: '#ffffff',
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  height: '50px',
-                  transition: 'background-color 0.3s ease'
+                  width: "100%",
+                  background: "#00E9B6",
+                  border: "none",
+                  padding: "18px",
+                  borderRadius: "15px",
+                  fontSize: "20px",
+                  fontWeight: "600",
+                  color: "#000",
+                  marginTop: "10px",
+                  cursor: "pointer",
                 }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#00c199'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#00d4aa'}
               >
                 Submit
               </button>
@@ -216,37 +233,8 @@ return (
           </div>
         </div>
       </div>
-    </div>
-
-    {/* Bottom Section - Terms & Conditions */}
-    <div 
-      style={{ 
-        backgroundColor: '#0d1a16',
-        marginTop: '40px',
-        padding: '15px 0'
-      }}
-    >
-      <div className="container-fluid px-4 px-lg-5">
-        <div className="row">
-          <div className="col-12 text-center">
-            <a 
-              href="/terms" 
-              className="text-light" 
-              style={{ 
-                textDecoration: 'none', 
-                fontSize: '0.85rem',
-                color: '#a0a0a0',
-                fontWeight: '400'
-              }}
-            >
-              Terms & Conditions
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </footer>
-);
-}
+    </footer>
+  );
+};
 
 export default Footer;

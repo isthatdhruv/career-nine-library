@@ -76,20 +76,18 @@
 }
 
 .nav-item {
-  position: relative;
-  white-space: nowrap;
-  flex-shrink: 0;
+  font-size: 16px; /* screenshot uses 16px Manrope */
 }
 
 .nav-link {
-  text-decoration: none;
-  color: #2c3e50;
+  font-family: "Manrope", sans-serif;
+  font-size: 16px;
+  color: #020101 !important;
+  padding: 0 20px 0 0 !important;
   font-weight: 500;
-  font-size: 1rem;
-  padding: 0.75rem 0.5rem;
-  transition: color 0.3s ease;
-  position: relative;
-  display: block;
+  text-decoration: none;
+  background: transparent;
+  display: inline-block;
 }
 
 .nav-link:hover {
