@@ -1,450 +1,221 @@
-import React, { useState, useEffect } from "react";
-import { FaChevronDown, FaTwitter, FaFacebookF, FaInstagram, FaLinkedinIn } from "react-icons/fa";
-import { db } from "../../firebase";
-import { collection, getDocs } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer";
 import "./CareerLibrary.css";
+import { db } from "../../firebase";
+import { collection, doc, getDoc } from "firebase/firestore";
+import Section from "../../components/Section/Section.tsx";
+import { useNavigate } from "react-router-dom"; // Add this import
 
-// Static categories based on the scraped URLs structure
-const categories = [
-  { slug: "actuarial-sciences", title: "Actuarial Sciences" },
-  { slug: "allied-medicine", title: "Allied Medicine" },
-  { slug: "animation-graphics", title: "Animation & Graphics" },
-  { slug: "applied-arts", title: "Applied Arts" },
-  { slug: "architecture", title: "Architecture" },
-  { slug: "aviation", title: "Aviation" },
-  { slug: "cabin-crew", title: "Cabin Crew" },
-  { slug: "civil-services", title: "Civil Services" },
-  { slug: "commerce-accounts", title: "Commerce & Accounts" },
-  { slug: "computer-application-it", title: "Computer Application & IT" },
-  { slug: "culinary-arts", title: "Culinary Arts" },
-  { slug: "data-science-artificial-intelligence", title: "Data Science & AI" },
-  { slug: "defense", title: "Defense" },
-  { slug: "design", title: "Design" },
-  { slug: "distribution-logistics", title: "Distribution & Logistics" },
-  { slug: "economics", title: "Economics" },
-  { slug: "education-training", title: "Education & Training" },
-  { slug: "engineering", title: "Engineering" },
-  { slug: "entrepreneurship", title: "Entrepreneurship" },
-  { slug: "ethical-hacking", title: "Ethical Hacking" },
-  { slug: "film-making", title: "Film Making" },
-  { slug: "finance-banking", title: "Finance & Banking" },
-  { slug: "food-agriculture", title: "Food & Agriculture" },
-  { slug: "geography", title: "Geography" },
-  { slug: "hotel-management", title: "Hotel Management" },
-  { slug: "international-relations", title: "International Relations" },
-  { slug: "language", title: "Language" },
-  { slug: "law", title: "Law" },
-  { slug: "life-science-environment", title: "Life Science & Environment" },
-  { slug: "management", title: "Management" },
-  { slug: "marketing-advertising", title: "Marketing & Advertising" },
-  { slug: "maths-statistics", title: "Maths & Statistics" },
-  { slug: "media-communication", title: "Media & Communication" },
-  { slug: "medicine", title: "Medicine" },
-  { slug: "merchant-navy", title: "Merchant Navy" },
-  { slug: "museology", title: "Museology" },
-  { slug: "nutrition-fitness", title: "Nutrition & Fitness" },
-  { slug: "performing-arts", title: "Performing Arts" },
-  { slug: "physical-science", title: "Physical Science" },
-  { slug: "political-science", title: "Political Science" },
-  { slug: "psychology", title: "Psychology" },
-  { slug: "sales", title: "Sales" },
-  { slug: "social-sciences-humanities", title: "Social Sciences & Humanities" },
-  { slug: "social-services", title: "Social Services" }
-];
 
-type Career = {
-  id: string;
-  title: string;
-  category: string;
-  slug: string;
-  url: string;
-  summary: string;
-  source: string;
-  hasDetailedData: boolean;
-  [key: string]: any; // To allow additional properties from ...data
-};
+
+
+
 
 const CareerLibrary = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("name");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [careers, setCareers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [filteredCategories, setFilteredCategories] = useState([]);
+    const [careers, setCareers] = useState<string[]>([]);
+    const [careerDetails, setCareerDetails] = useState<{ [key: string]: any }>({});
+    const [careerList, setCareerList] = useState<any[]>([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [sortBy, setSortBy] = useState<'name' | 'popularity'>('name');
+    const navigate = useNavigate(); // Initialize useNavigate
+    useEffect(() => {
+        const fetchCareers = async () => {
+            try {
+                const mappingDoc = doc(collection(db, 'mappingSchema'), 'mapping');
+                const mappingDocSnap = await getDoc(mappingDoc);
+                localStorage.setItem('careerMapping', JSON.stringify(mappingDocSnap.data()));
+                
+                const data = mappingDocSnap.data();
+                if (data) {
+                    
+                    const careerKeys = Object.keys(data);
+                    const careerValues = Object.values(data);
 
-  // Helper function to extract category from URL
-  const extractCategoryFromUrl = (url) => {
-    try {
-      const urlObj = new URL(url);
-      const pathParts = urlObj.pathname.replace(/^\//, '').split('/');
-      const clIdx = pathParts.findIndex(p => p === 'careerlibrary');
-      if (clIdx !== -1 && pathParts[clIdx + 1]) {
-        return pathParts[clIdx + 1];
-      }
-    } catch (e) {
-      console.warn('Could not parse URL:', url);
-    }
-    return 'uncategorized';
-  };
+                    setCareerDetails(careerValues);
+                    setCareers(careerKeys);
 
-  // Helper function to extract career title from URL
-  const extractTitleFromUrl = (url) => {
-    try {
-      const urlObj = new URL(url);
-      const pathParts = urlObj.pathname.replace(/^\//, '').split('/');
-      const lastPart = pathParts[pathParts.length - 1];
-      
-      // Convert URL slug to title
-      return lastPart
-        .replace(/-/g, ' ')
-        .replace(/\b\w/g, l => l.toUpperCase())
-        .replace(/\s+/g, ' ')
-        .trim();
-    } catch (e) {
-      return 'Unknown Career';
-    }
-  };
+                    const tempList: string[] = [];
+                    careerValues.forEach((categoryData: any) => {
+                        if (categoryData && typeof categoryData === 'object') {
+                            // Get the career names (keys) from each category, not the values
+                            const careerNames = Object.keys(categoryData);
+                            tempList.push(...careerNames);
+                        }
+                    });
 
-  // Helper function to generate slug from title
-  const generateSlug = (title) => {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
-  };
+                    setCareerList(tempList);
+                    // console.log("Career List:", tempList);
 
-  // Fetch all career data in a single optimized request
-  useEffect(() => {
-    const fetchAllCareerData = async () => {
-      try {
-        setLoading(true);
-        console.log('🔄 Fetching career data from Firebase...');
+                } else {
+                    setCareers([]);
+                }
 
-        // Fetch both collections in parallel for optimization
-        const [careerPagesSnap, savedUrlsSnap] = await Promise.all([
-          getDocs(collection(db, 'careerPages')),
-          getDocs(collection(db, 'savedUrls'))
-        ]);
 
-        const allCareers: Career[] = [];
-        const processedUrls = new Set(); // To avoid duplicates
 
-        // Process career pages first (these have more detailed data)
-        careerPagesSnap.forEach(doc => {
-          const data = doc.data();
-          const url = data.url || data.pageUrl;
-          
-          if (url) {
-            processedUrls.add(url);
-            
-            const category = extractCategoryFromUrl(url);
-            const title = data.title || extractTitleFromUrl(url);
-            
-            allCareers.push({
-              id: doc.id,
-              title: title,
-              category: category,
-              slug: generateSlug(title),
-              url: url,
-              summary: data.summary || '',
-              source: 'careerPages',
-              hasDetailedData: true,
-              ...data
-            });
-          }
-        });
-
-        // Process saved URLs (for careers not in careerPages)
-        savedUrlsSnap.forEach(doc => {
-          const data = doc.data();
-          
-          // Handle different data structures in savedUrls
-          let urlsToProcess: string[] = [];
-          
-          if (typeof data === 'string') {
-            urlsToProcess = [data];
-          } else if (data.url) {
-            urlsToProcess = [data.url];
-          } else if (data.pageUrl) {
-            urlsToProcess = [data.pageUrl];
-          } else if (data.urls && Array.isArray(data.urls)) {
-            urlsToProcess = data.urls as string[];
-          } else if (data.links && Array.isArray(data.links)) {
-            urlsToProcess = data.links.map((link: any) => link.url || link.pageUrl || link).filter(Boolean);
-          }
-
-          urlsToProcess.forEach(url => {
-            if (url && !processedUrls.has(url)) {
-              processedUrls.add(url);
-              
-              const category = extractCategoryFromUrl(url);
-              const title = extractTitleFromUrl(url);
-              
-              allCareers.push({
-                id: `saved-${generateSlug(title)}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                title: title,
-                category: category,
-                slug: generateSlug(title),
-                url: url,
-                summary: `Explore career opportunities in ${title}. Learn about requirements, skills, and growth prospects in this field.`,
-                source: 'savedUrls',
-                hasDetailedData: false
-              });
+            } catch (error) {
+                console.error("Error fetching careers:", error);
             }
-          });
-        });
+            // You can use mappingDocSnap.data() here
+        };
+        
 
-        console.log(`✅ Loaded ${allCareers.length} careers from ${processedUrls.size} unique URLs`);
-        console.log('📊 Career sources:', {
-          careerPages: allCareers.filter(c => c.source === 'careerPages').length,
-          savedUrls: allCareers.filter(c => c.source === 'savedUrls').length
-        });
+        fetchCareers();
+    }, []);
 
-        setCareers(allCareers);
-        setError(null);
-      } catch (err) {
-        console.error('❌ Error fetching career data:', err);
-        setError('Failed to fetch career data');
-      } finally {
-        setLoading(false);
-      }
+    const createSlug = (careerName: string): string => {
+        return careerName
+            .toLowerCase()
+            
     };
 
-    fetchAllCareerData();
-  }, []);
+    // Handle card click navigation
+    const handleCardClick = (career: string) => {
+        const slug = createSlug(career);
+        navigate(`/${slug}`);
+    };
 
-  // Helper functions for career filtering and counting
-  const getCareersByCategory = (categorySlug) => {
-    return careers.filter(career => career.category === categorySlug);
-  };
+    // Exclude the 'uncategorized' category from display
+    const displayCareers = careers.filter(career => career.toLowerCase() !== 'uncategorized');
 
-  const getCategoriesWithCareerCount = () => {
-    const categoryCounts = {};
-    careers.forEach(career => {
-      categoryCounts[career.category] = (categoryCounts[career.category] || 0) + 1;
-    });
-    return categoryCounts;
-  };
-
-  const getCategoryCareerCount = (categorySlug) => {
-    return getCareersByCategory(categorySlug).length;
-  };
-
-  // Update filtered categories when careers, search term, or sort changes
-  useEffect(() => {
-    const categoryCounts = getCategoriesWithCareerCount();
-    
-    let filtered = categories.filter(category => {
-      // Only show categories that have careers
-      const hasCareers = categoryCounts[category.slug] > 0;
-      
-      // Filter by search term
-      const matchesSearch = category.title.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      return hasCareers && matchesSearch;
-    });
-
-    // Sort categories
-    filtered = filtered.sort((a, b) => {
-      if (sortBy === "name") {
-        return a.title.localeCompare(b.title);
-      } else {
-        // Sort by popularity (number of careers in category)
-        const aCount = categoryCounts[a.slug] || 0;
-        const bCount = categoryCounts[b.slug] || 0;
-        return bCount - aCount;
-      }
-    });
-
-    setFilteredCategories(filtered);
-  }, [searchTerm, sortBy, careers]);
-
-  if (loading) {
-    return (
-      <div className="cl-page">
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-          <div>Loading careers...</div>
-        </div>
-      </div>
+    const filteredCareers = displayCareers.filter(career =>
+        career.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }
 
-  if (error) {
+    // Sort careers
+    const sortedCareers = [...filteredCareers].sort((a, b) => {
+        if (sortBy === 'name') {
+            return a.localeCompare(b);
+        }
+        // Add popularity sorting logic here if needed
+        return 0;
+    });
+
     return (
-      <div className="cl-page">
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-          <div>Error: {error}</div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="cl-page">
-      {/* Header */}
-      <header className="cl-header">
-        <img
-          src="/images/logo-mindler.svg"
-          alt="Career-9"
-          className="cl-logo"
-        />
-        <nav className="cl-nav">
-          {["For Students", "For Institutions", "For Career Professionals", "Resources"].map(label => (
-            <div key={label} className="cl-nav-item">
-              {label} <FaChevronDown size={12} />
-            </div>
-          ))}
-        </nav>
-        <div className="cl-cta">
-          <button className="cl-btn-primary">Get Started</button>
-          <button className="cl-login" style={{ background: 'none', border: 'none', color: '#007cba', textDecoration: 'none', fontSize: '14px', cursor: 'pointer' }}>Log In</button>
-        </div>
-      </header>
-
-      {/* Banner */}
-      <section className="cl-banner">
-        <div className="cl-banner-content">
-          <h1>Career Library</h1>
-        </div>
-      </section>
-
-      {/* Search */}
-      <section className="cl-search">
-        <h2>What career are you looking for?</h2>
-        <p className="career-stats">
-          Explore {careers.length} careers across {categories.length} categories
-        </p>
-        <div className="cl-search-bar">
-          <input
-            type="text"
-            placeholder="Search for information on 200+ career options"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-          />
-          <button>Search</button>
-        </div>
-      </section>
-
-      {/* Sort */}
-      <section className="cl-sort">
-        <span>Sort By:</span>
-        <button
-          className={sortBy === "name" ? "active" : ""}
-          onClick={() => setSortBy("name")}
-        >
-          Name
-        </button>
-        <button
-          className={sortBy === "popularity" ? "active" : ""}
-          onClick={() => setSortBy("popularity")}
-        >
-          Popularity
-        </button>
-      </section>
-
-      {/* Grid */}
-      <section className="cl-grid">
-        {selectedCategory ? (
-          // Show careers in selected category
-          <div className="category-careers">
-            <div className="category-header">
-              <button 
-                className="back-btn" 
-                onClick={() => setSelectedCategory("")}
-              >
-                ← Back to Categories
-              </button>
-              <h2>
-                {categories.find(cat => cat.slug === selectedCategory)?.title} Careers
-              </h2>
-            </div>
-            <div className="careers-grid">
-              {getCareersByCategory(selectedCategory).map(career => (
-                <div key={career.id} className="cl-card career-card">
-                  <div className="cl-card-content">
-                    <h3>{career.title}</h3>
-                    {career.summary && (
-                      <p className="career-summary">
-                        {career.summary.substring(0, 150)}
-                        {career.summary.length > 150 ? '...' : ''}
-                      </p>
-                    )}
-                    <button className="learn-more-btn">Learn More</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          // Show categories
-          <>
-            {filteredCategories.map(cat => {
-              const careerCount = getCategoryCareerCount(cat.slug);
-              return (
-                <div key={cat.slug} className="cl-card" onClick={() => setSelectedCategory(cat.slug)}>
-                  <div className="cl-card-img-container">
-                    <img
-                      src={`/images/careers/${cat.slug}.jpg`}
-                      alt={cat.title}
-                      className="cl-card-img"
-                      onError={(e) => {
-                        // Hide the image and show a placeholder
-                        (e.target as HTMLImageElement).style.display = 'none';
-                        const container = (e.target as HTMLImageElement).parentElement;
-                        if (container) {
-                          container.classList.add('placeholder');
-                        }
-                      }}
-                    />
-                    <div className="img-placeholder">
-                      <div className="placeholder-icon">📚</div>
-                      <div className="placeholder-text">{cat.title}</div>
+        <div className="container-fluid d-flex flex-column min-vh-100 p-0">
+            <Header />
+            <Section />
+            <div className="career-search-section py-5">
+                <div className="container text-center">
+                    <h2 className="search-title mb-4">What career are you looking for?</h2>
+                    <div className="row justify-content-center">
+                        <div className="col-md-8 col-lg-6">
+                            <div className="cl-search-bar d-flex">
+                                <input
+                                    type="text"
+                                    placeholder="Search for information on 200+ career options"
+                                    value={searchTerm}
+                                    onChange={e => setSearchTerm(e.target.value)}
+                                    className="search-input"
+                                />
+                                <button className="search-button">Search</button>
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                  <div className="cl-card-content">
-                    <h3>{cat.title}</h3>
-                    <p className="career-count">{careerCount} career{careerCount !== 1 ? 's' : ''}</p>
-                  </div>
                 </div>
-              );
-            })}
-          </>
-        )}
-      </section>
+            </div>
 
-      {/* Footer */}
-      <footer className="cl-footer">
-        <div className="footer-section">
-          <h3>Call Our Helpline</h3>
-          <p>Got career-related questions? Talk to our experts!</p>
-          <strong>+91 87449 87449</strong>
+            <div className="container my-5 flex-grow-1">
+                {/* Stats and Sort Section */}
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <span className="career-stats">
+                        Explore {careerList.length} career options from {displayCareers.length} Career Categories.
+                    </span>
+                    <div className="sort-options">
+                        <span className="me-3">Sort By:</span>
+                        <button
+                            className={`btn btn-sm me-2 ${sortBy === 'name' ? 'btn-success' : 'btn-outline-success'}`}
+                            onClick={() => setSortBy('name')}
+                        >
+                            Name
+                        </button>
+                        <button
+                            className={`btn btn-sm ${sortBy === 'popularity' ? 'btn-success' : 'btn-outline-success'}`}
+                            onClick={() => setSortBy('popularity')}
+                        >
+                            Popularity
+                        </button>
+                    </div>
+                </div>
+                {/* Career Category Cards */}
+                <div className="row g-4">
+                    {sortedCareers.map((career, index) => (
+                        <div key={index} className="col-12 col-sm-6 col-lg-4">
+                            <div 
+                                className="card h-100 border-0 shadow-sm position-relative overflow-hidden career-card"
+                                onClick={() => {
+                                   handleCardClick(career);
+                                }}
+                                style={{ 
+                                    cursor: 'pointer',
+                                    minHeight: '250px'
+                                    // Removed the inline background style - now handled by CSS class
+                                }}
+                            >
+                                {/* Career Image */}
+                                <img
+                                    src={`/${career.toLowerCase().replace(/\s+/g, '-').replace(/&/g, 'and')}.png`}
+                                    className="card-img career-image"
+                                    alt={career}
+                                    onError={(e) => {
+                                        // Hide image and show gradient background if image fails to load
+                                        e.currentTarget.style.display = 'none';
+                                    }}
+                                    onLoad={(e) => {
+                                        // Hide the placeholder icon when image loads successfully
+                                        const placeholderIcon = e.currentTarget.parentElement?.querySelector('.placeholder-icon');
+                                        if (placeholderIcon) {
+                                            (placeholderIcon as HTMLElement).style.display = 'none';
+                                        }
+                                    }}
+                                />
+                                
+                                <div className="card-img-overlay d-flex align-items-end p-0">
+                                    <div className="w-100 text-center p-4" style={{
+                                        background: 'linear-gradient(transparent, rgba(0,0,0,0.8))'
+                                    }}>
+                                        <h5 className="card-title text-white fw-bold mb-0">
+                                            {career.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                                        </h5>
+                                    </div>
+                                </div>
+                                
+                                {/* Placeholder Icon - shown when no image */}
+                                <div className="position-absolute top-50 start-50 translate-middle placeholder-icon">
+                                    <i className="bi bi-briefcase" style={{
+                                        fontSize: '4rem',
+                                        color: 'rgba(255,255,255,0.3)'
+                                    }}></i>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                
+                {/* No results message */}
+                {filteredCareers.length === 0 && searchTerm && (
+                    <div className="text-center mt-5">
+                        <div className="no-results">
+                            <h4>No career categories found</h4>
+                            <p>No results found for "{searchTerm}". Try a different search term.</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Loading state */}
+                {careers.length === 0 && !searchTerm && (
+                    <div className="text-center mt-5">
+                        <div className="spinner-border" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                        <p className="mt-2">Loading career categories...</p>
+                    </div>
+                )}
+            </div>
+            <Footer />
         </div>
-        <div className="footer-section">
-          <h3>Subscribe to our Newsletter</h3>
-          <p>
-            Expert-written articles and everything else you need to choose the
-            right career, delivered weekly to your inbox.
-          </p>
-          <div className="subscribe-bar">
-            <input type="email" placeholder="Enter your email" />
-            <button>Subscribe</button>
-          </div>
-        </div>
-        <div className="footer-section">
-          <h3>Stay Connected</h3>
-          <div className="social-icons">
-            <FaTwitter />
-            <FaFacebookF />
-            <FaInstagram />
-            <FaLinkedinIn />
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
+
+    );
 };
 
 export default CareerLibrary;

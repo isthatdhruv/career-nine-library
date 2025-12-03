@@ -274,85 +274,7 @@ const CareerPreview: React.FC<CareerPreviewProps> = ({
 
   return (
     <div className="container py-4">
-      {/* Breadcrumb & Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <nav aria-label="breadcrumb">
-          <ol className="breadcrumb mb-0">
-            <li className="breadcrumb-item">
-              <span className="text-muted">Home</span>
-            </li>
-            <li className="breadcrumb-item">
-              <span className="text-muted">Career Library</span>
-            </li>
-            <li className="breadcrumb-item active" aria-current="page">
-              {displayTitle}
-            </li>
-          </ol>
-        </nav>
-        <div className="d-flex gap-2">
-          {/* Back to Edit Button */}
-          <button 
-            className="btn btn-outline-primary"
-            onClick={() => navigate('/edit-careers', { 
-              state: { 
-                selectedCareer: currentSlug,
-                fromPreview: true,
-                isTemporaryPreview: isTemporaryPreview,
-                originalId: careerData?.originalId || currentSlug
-              } 
-            })}
-            title="Go back to edit this career page"
-          >
-            ✏️ Back to Edit
-          </button>
-          {/* Career Selection Dropdown */}
-          <select 
-            className="form-select w-auto" 
-            value={currentSlug || ''} 
-            onChange={handleCareerChange}
-          >
-            <option value="">Choose another Career</option>
-            {availableCareers.map(career => (
-              <option key={career.id} value={career.id}>
-                {career.title}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="row">
-        {/* Sidebar Navigation */}
-        <aside className="col-12 col-md-3 mb-4">
-          <ul className="nav flex-column nav-pills">
-            <li className="nav-item"><a className="nav-link" href="#summary">Summary</a></li>
-            {careerOpportunities.length > 0 && (
-              <li className="nav-item"><a className="nav-link" href="#professional-opportunities">Professional Opportunities</a></li>
-            )}
-            {careerPaths.length > 0 && (
-              <li className="nav-item"><a className="nav-link" href="#career-path">Career Path</a></li>
-            )}
-            {importantFacts.length > 0 && (
-              <li className="nav-item"><a className="nav-link" href="#important-facts">Important Facts</a></li>
-            )}
-            {leadingInstitutes.length > 0 && (
-              <li className="nav-item"><a className="nav-link" href="#leading-institutes">Leading Institutes</a></li>
-            )}
-            {institutionsAbroad.length > 0 && (
-              <li className="nav-item"><a className="nav-link" href="#institutions-abroad">Institutions Abroad</a></li>
-            )}
-            {entranceExams.length > 0 && (
-              <li className="nav-item"><a className="nav-link" href="#entrance-exams">Entrance Exams</a></li>
-            )}
-            {workDescription.length > 0 && (
-              <li className="nav-item"><a className="nav-link" href="#work-description">Work Description</a></li>
-            )}
-            {(prosAndCons.pros.length > 0 || prosAndCons.cons.length > 0) && (
-              <li className="nav-item"><a className="nav-link" href="#pros-cons">Pros & Cons</a></li>
-            )}
-          </ul>
-        </aside>
-
+      
         {/* Main Content */}
         <main className="col-12 col-md-9">
           {/* Summary Section */}
@@ -630,7 +552,7 @@ const CareerPreview: React.FC<CareerPreviewProps> = ({
 
         </main>
       </div>
-    </div>
+    
   );
 };
 
