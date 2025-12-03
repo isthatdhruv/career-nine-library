@@ -1,0 +1,35 @@
+{
+  "backupDate": "2025-09-23T08:15:07.915Z",
+  "collections": [
+    {
+      "name": "careerPages",
+      "documentCount": 226
+    },
+    {
+      "name": "mappingSchema",
+      "documentCount": 1
+    },
+    {
+      "name": "savedUrls",
+      "documentCount": 224
+    },
+    {
+      "name": "workValues",
+      "documentCount": 1
+    }
+  ],
+  "images": {
+    "fromStorage": {
+      "downloaded": 0,
+      "failed": 0
+    },
+    "fromUrls": {
+      "downloaded": 60,
+      "failed": 2,
+      "skipped": 22
+    },
+    "totalDownloaded": 60,
+    "totalFailed": 2,
+    "totalSkipped": 22
+  }
+}
