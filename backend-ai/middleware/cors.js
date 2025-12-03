@@ -12,6 +12,7 @@ const corsOptions = {
       'http://127.0.0.1:3001',
       'http://0.0.0.0:3000',
       'http://0.0.0.0:3001',
+      'https://library.career-9.com',
       process.env.FRONTEND_URL
     ].filter(Boolean);
 

@@ -125,7 +125,7 @@ ui-debug.log
 # Frontend specific
 /frontend/src/**/*.js.map
 /frontend/src/**/*.css.map
-/functions
+
 # AI Backend specific
 /backend-ai/.env
 
