@@ -69,7 +69,7 @@ const AIEnhancementModal = ({ isOpen, onClose, originalContent, onApply, fieldPa
 
   const getContentType = (path) => {
     const lowerPath = path.toLowerCase();
-    
+
     // Specific field type mappings
     if (lowerPath.includes('summary')) return 'career summary';
     if (lowerPath.includes('work description')) return 'work description';
@@ -85,7 +85,7 @@ const AIEnhancementModal = ({ isOpen, onClose, originalContent, onApply, fieldPa
     if (lowerPath.includes('name') && lowerPath.includes('institute')) return 'institute name';
     if (lowerPath.includes('location')) return 'institute location';
     if (lowerPath.includes('date')) return 'examination date';
-    
+
     return 'career content';
   };
 
@@ -176,7 +176,7 @@ const AIEnhancementModal = ({ isOpen, onClose, originalContent, onApply, fieldPa
         `Mention exam frequency (annual/bi-annual) for ${careerTitle}`
       ]
     };
-    
+
     return prompts[contentType] || [
       `Improve the content quality and clarity for ${careerTitle}`,
       `Add more specific and relevant details for ${careerTitle}`,
@@ -303,7 +303,7 @@ const AIEnhancementModal = ({ isOpen, onClose, originalContent, onApply, fieldPa
             }}>
               Enhancement Instructions
             </label>
-            
+
             {/* Smart Prompt Suggestions */}
             <div style={{ marginBottom: '12px' }}>
               <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
@@ -355,7 +355,7 @@ const AIEnhancementModal = ({ isOpen, onClose, originalContent, onApply, fieldPa
                 })}
               </div>
             </div>
-            
+
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
@@ -426,8 +426,8 @@ const AIEnhancementModal = ({ isOpen, onClose, originalContent, onApply, fieldPa
               onClick={handleEnhance}
               disabled={isLoading || !prompt.trim()}
               style={{
-                background: isLoading || !prompt.trim() 
-                  ? '#9ca3af' 
+                background: isLoading || !prompt.trim()
+                  ? '#9ca3af'
                   : 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
                 color: 'white',
                 border: 'none',
@@ -461,7 +461,7 @@ const AIEnhancementModal = ({ isOpen, onClose, originalContent, onApply, fieldPa
                 </>
               )}
             </button>
-            
+
             <button
               onClick={handleApply}
               disabled={!enhancedContent.trim()}
@@ -479,7 +479,7 @@ const AIEnhancementModal = ({ isOpen, onClose, originalContent, onApply, fieldPa
             >
               Apply Changes
             </button>
-            
+
             <button
               onClick={onClose}
               style={{
@@ -521,10 +521,10 @@ const NestedEditor = ({ value, onChange, isTopLevel = false, parentHeading = '',
   const shouldShowMagicButton = (content, isTopLevel = false) => {
     // Only show for string content (including empty strings)
     if (typeof content !== 'string') return false;
-    
+
     // Don't show Magic buttons at top level (these are handled by the main editor)
     if (isTopLevel) return false;
-    
+
     // Show magic button for all string values (including empty ones)
     return true;
   };
@@ -557,14 +557,14 @@ const NestedEditor = ({ value, onChange, isTopLevel = false, parentHeading = '',
             {value.map((item, idx) => (
               <div key={idx} style={{ marginBottom: 8, display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                 <div style={{ flex: 1 }}>
-                  <NestedEditor 
-                    value={item} 
+                  <NestedEditor
+                    value={item}
                     onChange={v => {
                       const newArr = [...value];
                       newArr[idx] = v;
                       onChange(newArr);
-                    }} 
-                    isTopLevel={false} 
+                    }}
+                    isTopLevel={false}
                     parentHeading={parentHeading}
                     fieldKey={`${fieldKey}[${idx}]`}
                     selectedCareer={selectedCareer}
@@ -572,20 +572,20 @@ const NestedEditor = ({ value, onChange, isTopLevel = false, parentHeading = '',
                   />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => {
                       const newArr = value.filter((_, i) => i !== idx);
                       onChange(newArr);
-                    }} 
-                    style={{ 
-                      background: '#fee2e2', 
-                      color: '#b91c1c', 
-                      border: 'none', 
-                      borderRadius: 6, 
-                      padding: '6px 12px', 
-                      fontWeight: 600, 
-                      fontSize: 14, 
+                    }}
+                    style={{
+                      background: '#fee2e2',
+                      color: '#b91c1c',
+                      border: 'none',
+                      borderRadius: 6,
+                      padding: '6px 12px',
+                      fontWeight: 600,
+                      fontSize: 14,
                       cursor: 'pointer',
                       alignSelf: 'flex-start'
                     }}
@@ -630,8 +630,8 @@ const NestedEditor = ({ value, onChange, isTopLevel = false, parentHeading = '',
                 </div>
               </div>
             ))}
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => {
                 // Infer type from sibling values (same logic as Add Field)
                 const siblings = value;
@@ -661,7 +661,7 @@ const NestedEditor = ({ value, onChange, isTopLevel = false, parentHeading = '',
                   }
                 }
                 onChange([...value, newValue]);
-              }} 
+              }}
               style={{
                 marginTop: 8,
                 background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
@@ -749,10 +749,10 @@ const NestedEditor = ({ value, onChange, isTopLevel = false, parentHeading = '',
                       e.target.blur();
                     }
                   }}
-                  style={{ 
-                    width: 140, 
-                    marginRight: 8, 
-                    minHeight: '185px', 
+                  style={{
+                    width: 140,
+                    marginRight: 8,
+                    minHeight: '185px',
                     resize: 'vertical',
                     padding: '8px 12px',
                     border: '1px solid #d1d5db',
@@ -763,13 +763,13 @@ const NestedEditor = ({ value, onChange, isTopLevel = false, parentHeading = '',
                   }}
                 />
                 <div style={{ flex: 1 }}>
-                  <NestedEditor 
-                    value={v} 
+                  <NestedEditor
+                    value={v}
                     onChange={nv => {
                       const newObj = { ...value, [k]: nv };
                       onChange(newObj);
-                    }} 
-                    isTopLevel={false} 
+                    }}
+                    isTopLevel={false}
                     parentHeading={parentHeading}
                     fieldKey={`${fieldKey}.${k}`}
                     selectedCareer={selectedCareer}
@@ -777,21 +777,21 @@ const NestedEditor = ({ value, onChange, isTopLevel = false, parentHeading = '',
                   />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => {
                       const newObj = { ...value };
                       delete newObj[k];
                       onChange(newObj);
-                    }} 
-                    style={{ 
-                      background: '#fee2e2', 
-                      color: '#b91c1c', 
-                      border: 'none', 
-                      borderRadius: 6, 
-                      padding: '6px 12px', 
-                      fontWeight: 600, 
-                      fontSize: 14, 
+                    }}
+                    style={{
+                      background: '#fee2e2',
+                      color: '#b91c1c',
+                      border: 'none',
+                      borderRadius: 6,
+                      padding: '6px 12px',
+                      fontWeight: 600,
+                      fontSize: 14,
                       cursor: 'pointer',
                       alignSelf: 'flex-start'
                     }}
@@ -836,8 +836,8 @@ const NestedEditor = ({ value, onChange, isTopLevel = false, parentHeading = '',
               </div>
             ))}
             <div style={{ display: 'flex', alignItems: 'center', marginTop: 8, gap: 8 }}>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => {
                   // const existingKeys = Object.keys(value);
                   let newKey = '';
@@ -845,7 +845,7 @@ const NestedEditor = ({ value, onChange, isTopLevel = false, parentHeading = '',
 
                   // All fields are now manually editable - no auto-naming
                   newKey = '';
-                  
+
                   // Infer type from sibling values for all contexts
                   const siblings = Object.values(value);
                   if (siblings.length > 0) {
@@ -900,10 +900,10 @@ const NestedEditor = ({ value, onChange, isTopLevel = false, parentHeading = '',
         <textarea
           value={value ?? ''}
           onChange={e => onChange(e.target.value)}
-          style={{ 
-            width: '100%', 
-            marginBottom: 0, 
-            minHeight: '185px', 
+          style={{
+            width: '100%',
+            marginBottom: 0,
+            minHeight: '185px',
             resize: 'vertical',
             padding: '12px',
             border: '1px solid #d1d5db',
@@ -959,7 +959,7 @@ const EditCareers = () => {
   // Navigation hooks
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // AI Modal state
   const [aiModal, setAiModal] = useState({ isOpen: false, content: '', fieldPath: '', onApply: null });
 
@@ -988,7 +988,7 @@ const EditCareers = () => {
       const now = new Date();
       const diffInMs = now - date;
       const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-      
+
       if (diffInDays === 0) {
         const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
         if (diffInHours === 0) {
@@ -1002,9 +1002,9 @@ const EditCareers = () => {
       } else if (diffInDays < 7) {
         return `${diffInDays} days ago`;
       } else {
-        return date.toLocaleDateString('en-US', { 
-          year: 'numeric', 
-          month: 'short', 
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
           day: 'numeric',
           hour: '2-digit',
           minute: '2-digit'
@@ -1112,7 +1112,7 @@ const EditCareers = () => {
     const pageUrl = `https://www.career-9.com/careerlibrary/${selectedCareer}/${pageNameSlug}`;
     // Generate a temporary id for the new page
     const tempId = 'new_' + Math.random().toString(36).slice(2);
-    
+
     // Create default schema structure for a new page (with flexible field names)
     const createDefaultSchema = () => {
       return {
@@ -1163,7 +1163,7 @@ const EditCareers = () => {
     // Find a template page for this career
     const templatePage = careerPages.find(p => p.career === selectedCareer && p.id !== tempId);
     let newFields;
-    
+
     if (templatePage) {
       // Deep clone the field structure, but blank out all values except title
       newFields = {};
@@ -1214,7 +1214,7 @@ const EditCareers = () => {
       // No template found, use default schema
       newFields = createDefaultSchema();
     }
-    
+
     const newPage = {
       id: tempId,
       career: selectedCareer,
@@ -1255,18 +1255,18 @@ const EditCareers = () => {
   const [returnFromPreviewMessage, setReturnFromPreviewMessage] = useState('');
   const [isNavigatingFromPreview, setIsNavigatingFromPreview] = useState(false);
   const [preservedEditState, setPreservedEditState] = useState({});
-  
+
   // Use a ref to persist edit state across renders and optimizations
   const editStateRef = useRef({});
   const preservedEditStateRef = useRef({});
-  
+
   // Session storage keys for persistence across potential React optimizations
   const SESSION_KEYS = {
     EDIT_STATE: 'editCareers_editState',
     PRESERVED_STATE: 'editCareers_preservedState',
     RETURN_FROM_PREVIEW: 'editCareers_returnFromPreview'
   };
-  
+
   // Load preserved state from session storage on mount
   useEffect(() => {
     try {
@@ -1277,7 +1277,7 @@ const EditCareers = () => {
         preservedEditStateRef.current = parsed;
         console.log('📦 Loaded preserved edit state from session storage:', parsed);
       }
-      
+
       const savedEditState = sessionStorage.getItem(SESSION_KEYS.EDIT_STATE);
       if (savedEditState) {
         const parsed = JSON.parse(savedEditState);
@@ -1288,8 +1288,9 @@ const EditCareers = () => {
     } catch (error) {
       console.warn('Failed to load state from session storage:', error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
+
   // Sync refs with state and save to session storage
   useEffect(() => {
     editStateRef.current = editState;
@@ -1298,8 +1299,9 @@ const EditCareers = () => {
     } catch (error) {
       console.warn('Failed to save edit state to session storage:', error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editState]);
-  
+
   useEffect(() => {
     preservedEditStateRef.current = preservedEditState;
     try {
@@ -1311,6 +1313,7 @@ const EditCareers = () => {
     } catch (error) {
       console.warn('Failed to save preserved state to session storage:', error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preservedEditState]);
   // ...existing code...
 
@@ -1331,7 +1334,7 @@ const EditCareers = () => {
           if (clIdx !== -1 && pathParts[clIdx + 1]) {
             careerSet.add(pathParts[clIdx + 1]);
           }
-        } catch (e) {}
+        } catch (e) { }
       });
       setCareers(Array.from(careerSet));
 
@@ -1353,15 +1356,15 @@ const EditCareers = () => {
       setOriginalState({});
       return;
     }
-    
+
     console.log('🔄 Page filtering useEffect running for career:', selectedCareer);
     console.log('🔄 isNavigatingFromPreview:', isNavigatingFromPreview);
     console.log('🔄 Current edit state before filtering:', editState);
-    
+
     const filtered = careerPages.filter(page => {
       // Filter by visibility based on toggle
       if (!showHiddenPages && page.isActive === false) return false;
-      
+
       if (page.career === selectedCareer) return true;
       if (page.pageUrl) {
         try {
@@ -1369,7 +1372,7 @@ const EditCareers = () => {
           const pathParts = url.pathname.replace(/^\//, '').split('/');
           const clIdx = pathParts.findIndex(p => p === 'careerlibrary');
           if (clIdx !== -1 && pathParts[clIdx + 1] === selectedCareer) return true;
-        } catch {}
+        } catch { }
       }
       return false;
     });
@@ -1388,7 +1391,7 @@ const EditCareers = () => {
         }
       });
     });
-    
+
     // Only update original state if we're not navigating from preview to preserve edit state
     if (!isNavigatingFromPreview) {
       setOriginalState(orig);
@@ -1403,8 +1406,9 @@ const EditCareers = () => {
         }));
       }, 500);
     }
-    
+
     console.log('🔄 Page filtering complete, edit state after filtering:', editState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCareer, careerPages, showHiddenPages, isNavigatingFromPreview]);
 
   // Handle navigation from preview page with selected career
@@ -1414,19 +1418,19 @@ const EditCareers = () => {
       const fromPreview = location.state.fromPreview;
       const isTemporaryPreview = location.state.isTemporaryPreview;
       const originalId = location.state.originalId;
-      
+
       console.log('🔄 Navigation from preview detected:', { pageSlug, fromPreview, isTemporaryPreview, originalId });
       console.log('🔄 Current preserved edit state (state):', preservedEditState);
       console.log('🔄 Current preserved edit state (ref):', preservedEditStateRef.current);
-      
+
       // Set flag to prevent other useEffects from interfering
       if (fromPreview) {
         setIsNavigatingFromPreview(true);
       }
-      
+
       // If coming from a temporary preview, use the originalId for the actual page
       const targetPageId = isTemporaryPreview && originalId ? originalId : pageSlug;
-      
+
       // Clean up temporary document if this was a temporary preview
       if (isTemporaryPreview && pageSlug.startsWith('temp_')) {
         console.log('🗑️ Cleaning up temporary document:', pageSlug);
@@ -1435,18 +1439,18 @@ const EditCareers = () => {
           console.warn('Failed to cleanup temp document:', error);
         });
       }
-      
+
       // Find the target page
       const targetPage = careerPages.find(page => page.id === targetPageId);
-      
+
       if (!targetPage) {
         console.warn('🚨 Target page not found:', targetPageId);
         return;
       }
-      
+
       // Extract career category from the page's URL or use page.career field
       let careerCategory = targetPage.career;
-      
+
       if (!careerCategory && targetPage.pageUrl) {
         try {
           const url = new URL(targetPage.pageUrl);
@@ -1459,48 +1463,48 @@ const EditCareers = () => {
           console.error('Error parsing URL:', e);
         }
       }
-      
+
       if (!careerCategory) {
         console.warn('🚨 No career category found for page:', targetPageId);
         return;
       }
-      
+
       // Find matching career in careers list
-      const matchingCareer = careers.find(career => 
+      const matchingCareer = careers.find(career =>
         career.toLowerCase().replace(/\s+/g, '-') === careerCategory ||
         career.toLowerCase() === careerCategory ||
         careerCategory.includes(career.toLowerCase().replace(/\s+/g, '-')) ||
         career.toLowerCase().includes(careerCategory)
       ) || careerCategory;
-      
+
       // Main navigation function
       const performNavigation = () => {
         console.log('🎯 Performing navigation to:', { career: matchingCareer, pageId: targetPageId });
-        
+
         // Set career and page
         setSelectedCareer(matchingCareer);
         setSelectedPageId(targetPageId);
-        
+
         // Restore edit state if coming from preview and we have preserved state
         // Use ref to get the most recent preserved state
         const currentPreservedState = preservedEditStateRef.current;
         const hasPreservedState = Object.keys(currentPreservedState).length > 0;
-        
+
         if (fromPreview && hasPreservedState) {
           console.log('🔄 Restoring edit state from preserved state (ref):', currentPreservedState);
-          
+
           // Directly set the preserved edit state using the ref data
           setEditState(currentPreservedState);
-          
+
           // Update the ref as well to maintain consistency
           editStateRef.current = currentPreservedState;
-          
+
           // Set up collapsed headings based on what has changes
           const pageEditState = currentPreservedState[targetPageId];
           if (pageEditState) {
             const newCollapsed = {};
             const changedSections = [];
-            
+
             defaultHeadings.forEach(heading => {
               const hasChanges = pageEditState[heading] !== undefined;
               newCollapsed[heading] = !hasChanges; // Expand sections with changes
@@ -1508,24 +1512,24 @@ const EditCareers = () => {
                 changedSections.push(heading);
               }
             });
-            
+
             setCollapsedHeadings(newCollapsed);
-            
+
             // Show success message
             if (changedSections.length > 0) {
               setReturnFromPreviewMessage(`📝 Welcome back! Your unsaved changes are preserved. Expanded sections: ${changedSections.join(', ')}`);
             } else {
               setReturnFromPreviewMessage('✅ Welcome back! You can continue editing.');
             }
-            
+
             // Clear message after 5 seconds
             setTimeout(() => setReturnFromPreviewMessage(''), 5000);
           }
-          
+
           // Clear preserved state after restoration
           setPreservedEditState({});
           preservedEditStateRef.current = {};
-          
+
           // Clear session storage after successful restoration
           try {
             sessionStorage.removeItem(SESSION_KEYS.PRESERVED_STATE);
@@ -1541,19 +1545,20 @@ const EditCareers = () => {
           });
           setCollapsedHeadings(newCollapsed);
         }
-        
+
         // Clear navigation flag
         setTimeout(() => {
           setIsNavigatingFromPreview(false);
         }, 100);
       };
-      
+
       // Execute navigation immediately
       performNavigation();
-      
+
       // Clear the location state to prevent re-execution
       window.history.replaceState({}, document.title);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state, careers, careerPages, defaultHeadings]); // Added defaultHeadings to deps
 
   // Check if there are any hidden pages for the selected career
@@ -1567,7 +1572,7 @@ const EditCareers = () => {
           const pathParts = url.pathname.replace(/^\//, '').split('/');
           const clIdx = pathParts.findIndex(p => p === 'careerlibrary');
           if (clIdx !== -1 && pathParts[clIdx + 1] === selectedCareer) return true;
-        } catch {}
+        } catch { }
       }
     }
     return false;
@@ -1588,7 +1593,7 @@ const EditCareers = () => {
       ...editState,
       [pageId]: { ...editState[pageId], [heading]: value }
     };
-    
+
     setEditState(newEditState);
     // Also update the ref to ensure it's always current
     editStateRef.current = newEditState;
@@ -1620,7 +1625,7 @@ const EditCareers = () => {
         if (currVal !== orig[heading]) {
           let value = currVal;
           if (typeof selectedPage[heading] !== 'string') {
-            try { value = JSON.parse(currVal); } catch {}
+            try { value = JSON.parse(currVal); } catch { }
           }
           changedFields[heading] = value;
         }
@@ -1702,7 +1707,7 @@ const EditCareers = () => {
           }
         }));
       }
-      
+
       // Show success alert
       const pageTitle = selectedPage.title || selectedPage.id;
       alert(`✅ Successfully saved changes to "${pageTitle}"!`);
@@ -1717,16 +1722,16 @@ const EditCareers = () => {
     const pageId = selectedPage.id;
     const pageTitle = selectedPage.title || pageId;
     const isCurrentlyActive = selectedPage.isActive !== false; // Default to true if not set
-    
+
     // Check if this is a new page that hasn't been saved yet
     if (pageId.startsWith('new_')) {
       const confirmMsg = `Are you sure you want to delete the new page "${pageTitle}"?\n\nThis page hasn't been saved yet, so it will be permanently removed.`;
       if (!window.confirm(confirmMsg)) return;
-      
+
       // Remove the new page from local state only
       setCareerPages(prev => prev.filter(p => p.id !== pageId));
       setPages(prev => prev.filter(p => p.id !== pageId));
-      
+
       // Clear edit and original state for this page
       setEditState(prev => {
         const newState = { ...prev };
@@ -1738,35 +1743,35 @@ const EditCareers = () => {
         delete newState[pageId];
         return newState;
       });
-      
+
       // Select the first available page or clear selection
       const remainingPages = pages.filter(p => p.id !== pageId);
       setSelectedPageId(remainingPages.length > 0 ? remainingPages[0].id : null);
       return;
     }
-    
+
     const action = isCurrentlyActive ? 'hide' : 'show';
     const confirmMsg = `Are you sure you want to ${action} the page "${pageTitle}"?\n\nThis will ${isCurrentlyActive ? 'hide the page from this career view but keep all data' : 'make the page visible again in this career view'}.`;
     if (!window.confirm(confirmMsg)) return;
-    
+
     setDeleting(prev => ({ ...prev, [pageId]: { ...prev[pageId], __page: true } }));
-    
+
     try {
       // Update the isActive flag instead of deleting
       const pageDoc = doc(db, 'careerPages', pageId);
-      await updateDoc(pageDoc, { 
+      await updateDoc(pageDoc, {
         isActive: !isCurrentlyActive,
         lastModified: new Date().toISOString()
       });
-      
+
       // Update local state - remove from current view if hiding
       if (isCurrentlyActive) {
         // Hiding the page - remove from current view
-        setCareerPages(prev => prev.map(p => 
+        setCareerPages(prev => prev.map(p =>
           p.id === pageId ? { ...p, isActive: false, lastModified: new Date().toISOString() } : p
         ));
         setPages(prev => prev.filter(p => p.id !== pageId));
-        
+
         // Clear edit and original state for this page
         setEditState(prev => {
           const newState = { ...prev };
@@ -1778,24 +1783,24 @@ const EditCareers = () => {
           delete newState[pageId];
           return newState;
         });
-        
+
         // Select the first available page or clear selection
         const remainingPages = pages.filter(p => p.id !== pageId);
         setSelectedPageId(remainingPages.length > 0 ? remainingPages[0].id : null);
       } else {
         // Showing the page - update in place
-        setCareerPages(prev => prev.map(p => 
+        setCareerPages(prev => prev.map(p =>
           p.id === pageId ? { ...p, isActive: true, lastModified: new Date().toISOString() } : p
         ));
-        setPages(prev => prev.map(p => 
+        setPages(prev => prev.map(p =>
           p.id === pageId ? { ...p, isActive: true, lastModified: new Date().toISOString() } : p
         ));
       }
-      
+
     } catch (e) {
       alert(`Failed to ${action} page: ` + e.message);
     }
-    
+
     setDeleting(prev => ({ ...prev, [pageId]: { ...prev[pageId], __page: false } }));
   };
 
@@ -1803,11 +1808,11 @@ const EditCareers = () => {
 
   return (
     <div className={styles.editCareersRoot} style={{ minHeight: '100vh', background: 'linear-gradient(120deg, #f8fafc 0%, #e0e7ff 100%)', padding: '0' }}>
-      <div className={styles.editCareersContainer} style={{background: '#fff', borderRadius: 18, boxShadow: '0 4px 32px 0 rgba(60,72,120,0.10)', padding: '40px 48px 48px 48px', minHeight: '700px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+      <div className={styles.editCareersContainer} style={{ background: '#fff', borderRadius: 18, boxShadow: '0 4px 32px 0 rgba(60,72,120,0.10)', padding: '40px 48px 48px 48px', minHeight: '700px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
         <h1 className={styles.title} style={{ textAlign: 'left', marginLeft: 0, fontSize: 32, fontWeight: 800, color: '#1e293b', marginBottom: 18, letterSpacing: '-1px' }}>
           Career Content Editor
         </h1>
-        
+
         {/* Return from preview notification */}
         {returnFromPreviewMessage && (
           <div style={{
@@ -1824,7 +1829,7 @@ const EditCareers = () => {
             {returnFromPreviewMessage}
           </div>
         )}
-        
+
         <div className={styles.careerSelectWrap} style={{ alignItems: 'flex-start', marginBottom: 28 }}>
           <label htmlFor="career-select" className={styles.careerSelectLabel} style={{ textAlign: 'left', marginLeft: 0, fontWeight: 600, fontSize: 18, color: '#334155', marginBottom: 8 }}>Select a Career</label>
           <select
@@ -1850,16 +1855,16 @@ const EditCareers = () => {
                       <button
                         className={styles.pageBtn + (selectedPageId === page.id ? ' selected' : '')}
                         onClick={() => handlePageSelect(page.id)}
-                        style={{ 
-                          minWidth: 140, 
-                          fontSize: 16, 
-                          fontWeight: 600, 
-                          borderRadius: 8, 
-                          padding: '10px 22px', 
-                          background: selectedPageId === page.id ? '#6366f1' : (page.isActive === false ? '#f3f4f6' : '#e0e7ff'), 
-                          color: selectedPageId === page.id ? '#fff' : (page.isActive === false ? '#6b7280' : '#373a47'), 
-                          border: page.isActive === false ? '1px dashed #d1d5db' : 'none', 
-                          boxShadow: selectedPageId === page.id ? '0 2px 8px 0 rgba(99,102,241,0.10)' : 'none', 
+                        style={{
+                          minWidth: 140,
+                          fontSize: 16,
+                          fontWeight: 600,
+                          borderRadius: 8,
+                          padding: '10px 22px',
+                          background: selectedPageId === page.id ? '#6366f1' : (page.isActive === false ? '#f3f4f6' : '#e0e7ff'),
+                          color: selectedPageId === page.id ? '#fff' : (page.isActive === false ? '#6b7280' : '#373a47'),
+                          border: page.isActive === false ? '1px dashed #d1d5db' : 'none',
+                          boxShadow: selectedPageId === page.id ? '0 2px 8px 0 rgba(99,102,241,0.10)' : 'none',
                           transition: 'all 0.2s',
                           opacity: page.isActive === false ? 0.7 : 1
                         }}
@@ -1875,14 +1880,14 @@ const EditCareers = () => {
                     <button
                       type="button"
                       onClick={() => setShowHiddenPages(!showHiddenPages)}
-                      style={{ 
-                        padding: '8px 16px', 
-                        borderRadius: 6, 
-                        background: showHiddenPages ? '#6366f1' : '#f1f5f9', 
-                        color: showHiddenPages ? '#fff' : '#374151', 
-                        fontSize: 14, 
-                        fontWeight: 600, 
-                        border: '1px solid #d1d5db', 
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: 6,
+                        background: showHiddenPages ? '#6366f1' : '#f1f5f9',
+                        color: showHiddenPages ? '#fff' : '#374151',
+                        fontSize: 14,
+                        fontWeight: 600,
+                        border: '1px solid #d1d5db',
                         cursor: 'pointer',
                         transition: 'all 0.2s'
                       }}
@@ -1909,9 +1914,9 @@ const EditCareers = () => {
                     {selectedPage.title || selectedPage.id}
                   </h2>
                   {selectedPage.timestamp && (
-                    <div style={{ 
-                      fontSize: 14, 
-                      color: '#64748b', 
+                    <div style={{
+                      fontSize: 14,
+                      color: '#64748b',
                       fontWeight: 500,
                       background: '#f1f5f9',
                       padding: '6px 12px',
@@ -1958,76 +1963,76 @@ const EditCareers = () => {
 
                 {/* Show current banner image if exists */}
                 {(bannerImages[selectedPage.id] || selectedPage.bannerImage) && (
+                  <div style={{
+                    marginTop: 16,
+                    padding: 16,
+                    background: '#fff',
+                    borderRadius: 8,
+                    border: '1px solid #e5e7eb',
+                    boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1)',
+                    marginBottom: 28
+                  }}>
+                    <h4 style={{ margin: '0 0 12px 0', fontSize: 14, fontWeight: 600, color: '#374151' }}>
+                      Current Banner Image
+                    </h4>
                     <div style={{
-                      marginTop: 16,
-                      padding: 16,
-                      background: '#fff',
-                      borderRadius: 8,
-                      border: '1px solid #e5e7eb',
-                      boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1)',
-                      marginBottom: 28
+                      width: '1536px',
+                      height: '1024px',
+                      maxWidth: '100%',
+                      border: '1px solid #d1d5db',
+                      borderRadius: 6,
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: '#f3f4f6',
+                      transform: 'scale(0.26)', // Scale down to fit in the UI (works for both 1536x1024 and 1792x1024)
+                      transformOrigin: 'top left',
+                      marginBottom: '-760px' // Adjust for the scaled-down size
                     }}>
-                      <h4 style={{ margin: '0 0 12px 0', fontSize: 14, fontWeight: 600, color: '#374151' }}>
-                        Current Banner Image
-                      </h4>
-                      <div style={{
-                        width: '1536px',
-                        height: '1024px',
-                        maxWidth: '100%',
-                        border: '1px solid #d1d5db',
-                        borderRadius: 6,
-                        overflow: 'hidden',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: '#f3f4f6',
-                        transform: 'scale(0.26)', // Scale down to fit in the UI (works for both 1536x1024 and 1792x1024)
-                        transformOrigin: 'top left',
-                        marginBottom: '-760px' // Adjust for the scaled-down size
-                      }}>
-                        <img
-                          src={bannerImages[selectedPage.id] || selectedPage.bannerImage}
-                          alt="Current banner"
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover' // Crop the image to fit the aspect ratio
-                          }}
-                        />
-                      </div>
+                      <img
+                        src={bannerImages[selectedPage.id] || selectedPage.bannerImage}
+                        alt="Current banner"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover' // Crop the image to fit the aspect ratio
+                        }}
+                      />
                     </div>
-                  )}
+                  </div>
+                )}
 
                 {defaultHeadings.map(heading => (
-                  <div key={heading} style={{ 
-                    marginBottom: 16, 
-                    background: '#fff', 
-                    borderRadius: 10, 
-                    boxShadow: collapsedHeadings[heading] ? '0 1px 3px 0 rgba(60,72,120,0.04)' : '0 1px 6px 0 rgba(60,72,120,0.06)', 
+                  <div key={heading} style={{
+                    marginBottom: 16,
+                    background: '#fff',
+                    borderRadius: 10,
+                    boxShadow: collapsedHeadings[heading] ? '0 1px 3px 0 rgba(60,72,120,0.04)' : '0 1px 6px 0 rgba(60,72,120,0.06)',
                     padding: '18px 22px',
                     transition: 'all 0.2s ease'
                   }}>
-                    <div style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      fontWeight: 700, 
-                      color: '#6366f1', 
-                      fontSize: 18, 
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      fontWeight: 700,
+                      color: '#6366f1',
+                      fontSize: 18,
                       marginBottom: collapsedHeadings[heading] ? 0 : 10,
                       cursor: 'pointer',
                       padding: '4px 0',
                       borderRadius: '6px',
                       transition: 'background-color 0.2s ease'
                     }}
-                    onClick={() => toggleHeadingCollapse(heading)}
-                    onMouseEnter={(e) => {
-                      if (collapsedHeadings[heading]) {
-                        e.currentTarget.style.backgroundColor = '#f1f5f9';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
+                      onClick={() => toggleHeadingCollapse(heading)}
+                      onMouseEnter={(e) => {
+                        if (collapsedHeadings[heading]) {
+                          e.currentTarget.style.backgroundColor = '#f1f5f9';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
                     >
                       <button
                         type="button"
@@ -2161,17 +2166,17 @@ const EditCareers = () => {
                   <button
                     onClick={handleDeletePage}
                     className={styles.deletePageBtn}
-                    style={{ 
-                      fontSize: 18, 
-                      padding: '12px 32px', 
-                      minWidth: 140, 
-                      borderRadius: 8, 
-                      background: selectedPage.isActive !== false ? '#dc2626' : '#059669', 
-                      color: '#fff', 
-                      fontWeight: 700, 
-                      border: 'none', 
-                      boxShadow: selectedPage.isActive !== false ? '0 2px 8px 0 rgba(220,38,38,0.15)' : '0 2px 8px 0 rgba(5,150,105,0.15)', 
-                      letterSpacing: '0.5px', 
+                    style={{
+                      fontSize: 18,
+                      padding: '12px 32px',
+                      minWidth: 140,
+                      borderRadius: 8,
+                      background: selectedPage.isActive !== false ? '#dc2626' : '#059669',
+                      color: '#fff',
+                      fontWeight: 700,
+                      border: 'none',
+                      boxShadow: selectedPage.isActive !== false ? '0 2px 8px 0 rgba(220,38,38,0.15)' : '0 2px 8px 0 rgba(5,150,105,0.15)',
+                      letterSpacing: '0.5px',
                       transition: 'all 0.2s',
                       cursor: 'pointer'
                     }}
@@ -2212,28 +2217,28 @@ const EditCareers = () => {
                       try {
                         // Get the most current edit state from ref (which is always up to date)
                         const currentEditState = editStateRef.current;
-                        
+
                         // Preserve current edit state before navigating to preview
                         console.log('💾 Preserving edit state before preview (ref):', currentEditState);
-                        
+
                         // Create a deep copy of current edit state for preservation
                         const preservedState = JSON.parse(JSON.stringify(currentEditState));
                         setPreservedEditState(preservedState);
                         preservedEditStateRef.current = preservedState;
-                        
+
                         console.log('💾 Preserved edit state set to (both state and ref):', preservedState);
-                        
+
                         // Create a temporary document with all current changes
                         const tempId = `temp_${selectedPage.id}_${Date.now()}`;
                         const currentPageData = { ...selectedPage };
-                        
+
                         // Apply all current edit state changes
                         if (editState[selectedPage.id]) {
                           Object.entries(editState[selectedPage.id]).forEach(([key, value]) => {
                             // If the original field is a string, use the edit value as-is
                             if (typeof selectedPage[key] === 'string') {
                               currentPageData[key] = value;
-                            } 
+                            }
                             // If the original field is an object/array, parse the edit value
                             else if (typeof selectedPage[key] === 'object' && selectedPage[key] !== null) {
                               try {
@@ -2242,32 +2247,32 @@ const EditCareers = () => {
                                 console.warn('Failed to parse edit value for preview:', key, error);
                                 currentPageData[key] = value;
                               }
-                            } 
+                            }
                             // For any other type, use the value as-is
                             else {
                               currentPageData[key] = value;
                             }
                           });
                         }
-                        
+
                         // Also include any banner image changes
                         if (bannerImages[selectedPage.id]) {
                           currentPageData.bannerImage = bannerImages[selectedPage.id];
                         }
-                        
+
                         // Add metadata for the temp document
                         currentPageData.isTemporary = true;
                         currentPageData.originalId = selectedPage.id;
                         currentPageData.createdAt = new Date().toISOString();
-                        
+
                         // Save to temporary collection in Firestore
                         const tempCollection = collection(db, 'tempPreviewPages');
                         const tempDocRef = doc(tempCollection, tempId);
                         await setDoc(tempDocRef, currentPageData);
-                        
+
                         // Navigate to preview page with temp ID
                         navigate(`/preview-career/${tempId}?temp=true`);
-                        
+
                         // Clean up temp document after 5 minutes (optional)
                         setTimeout(async () => {
                           try {
@@ -2276,7 +2281,7 @@ const EditCareers = () => {
                             console.warn('Failed to clean up temp document:', error);
                           }
                         }, 5 * 60 * 1000); // 5 minutes
-                        
+
                       } catch (error) {
                         console.error('Error creating preview:', error);
                         alert('❌ Failed to create preview. Please try again.');
@@ -2312,17 +2317,17 @@ const EditCareers = () => {
                   <button
                     onClick={handleSaveAll}
                     className={styles.saveBtn}
-                    style={{ 
-                      fontSize: 18, 
-                      padding: '12px 44px', 
-                      minWidth: 140, 
-                      borderRadius: 8, 
-                      background: '#6366f1', 
-                      color: '#fff', 
-                      fontWeight: 700, 
-                      border: 'none', 
-                      boxShadow: '0 2px 8px 0 rgba(99,102,241,0.10)', 
-                      letterSpacing: '0.5px', 
+                    style={{
+                      fontSize: 18,
+                      padding: '12px 44px',
+                      minWidth: 140,
+                      borderRadius: 8,
+                      background: '#6366f1',
+                      color: '#fff',
+                      fontWeight: 700,
+                      border: 'none',
+                      boxShadow: '0 2px 8px 0 rgba(99,102,241,0.10)',
+                      letterSpacing: '0.5px',
                       transition: 'all 0.2s',
                       cursor: 'pointer'
                     }}
@@ -2335,7 +2340,7 @@ const EditCareers = () => {
                         if (selectedPage[heading] !== undefined) {
                           const currVal = curr[heading] ?? (typeof selectedPage[heading] === 'string' ? selectedPage[heading] : JSON.stringify(selectedPage[heading], null, 2));
                           return currVal !== orig[heading];
-                          
+
                         }
                         return false;
                       });
@@ -2362,7 +2367,7 @@ const EditCareers = () => {
             )}
           </>
         )}
-        
+
         <AIEnhancementModal
           isOpen={aiModal.isOpen}
           onClose={() => setAiModal({ ...aiModal, isOpen: false })}
@@ -2380,7 +2385,7 @@ const EditCareers = () => {
           onImageSelect={handleImageSelect}
           existingImageUrl={bannerImages[selectedPage?.id] || selectedPage?.bannerImage}
         />
-        
+
         {/* Production Debugger - Remove this after debugging */}
         <ProductionDebugger />
       </div>

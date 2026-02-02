@@ -14,7 +14,6 @@ import { useNavigate } from "react-router-dom"; // Add this import
 
 const CareerLibrary = () => {
     const [careers, setCareers] = useState<string[]>([]);
-    const [careerDetails, setCareerDetails] = useState<{ [key: string]: any }>({});
     const [careerList, setCareerList] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState<'name' | 'popularity'>('name');
@@ -25,14 +24,14 @@ const CareerLibrary = () => {
                 const mappingDoc = doc(collection(db, 'mappingSchema'), 'mapping');
                 const mappingDocSnap = await getDoc(mappingDoc);
                 localStorage.setItem('careerMapping', JSON.stringify(mappingDocSnap.data()));
-                
+
                 const data = mappingDocSnap.data();
                 if (data) {
-                    
+
                     const careerKeys = Object.keys(data);
                     const careerValues = Object.values(data);
 
-                    setCareerDetails(careerValues);
+
                     setCareers(careerKeys);
 
                     const tempList: string[] = [];
@@ -58,7 +57,7 @@ const CareerLibrary = () => {
             }
             // You can use mappingDocSnap.data() here
         };
-        
+
 
         fetchCareers();
     }, []);
@@ -66,7 +65,7 @@ const CareerLibrary = () => {
     const createSlug = (careerName: string): string => {
         return careerName
             .toLowerCase()
-            
+
     };
 
     // Handle card click navigation
@@ -141,12 +140,12 @@ const CareerLibrary = () => {
                 <div className="row g-4">
                     {sortedCareers.map((career, index) => (
                         <div key={index} className="col-12 col-sm-6 col-lg-4">
-                            <div 
+                            <div
                                 className="card h-100 border-0 shadow-sm position-relative overflow-hidden career-card"
                                 onClick={() => {
-                                   handleCardClick(career);
+                                    handleCardClick(career);
                                 }}
-                                style={{ 
+                                style={{
                                     cursor: 'pointer',
                                     minHeight: '250px'
                                     // Removed the inline background style - now handled by CSS class
@@ -169,7 +168,7 @@ const CareerLibrary = () => {
                                         }
                                     }}
                                 />
-                                
+
                                 <div className="card-img-overlay d-flex align-items-end p-0">
                                     <div className="w-100 text-center p-4" style={{
                                         background: 'linear-gradient(transparent, rgba(0,0,0,0.8))'
@@ -179,7 +178,7 @@ const CareerLibrary = () => {
                                         </h5>
                                     </div>
                                 </div>
-                                
+
                                 {/* Placeholder Icon - shown when no image */}
                                 <div className="position-absolute top-50 start-50 translate-middle placeholder-icon">
                                     <i className="bi bi-briefcase" style={{
@@ -191,7 +190,7 @@ const CareerLibrary = () => {
                         </div>
                     ))}
                 </div>
-                
+
                 {/* No results message */}
                 {filteredCareers.length === 0 && searchTerm && (
                     <div className="text-center mt-5">

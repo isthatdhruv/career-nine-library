@@ -26,11 +26,11 @@ export const useCareerPages = () => {
 
 export const useDataStats = () => {
   const { totalLinks, totalCareerPages, hasData, loading } = useData();
-  return useMemo(() => ({ 
-    totalLinks, 
-    totalCareerPages, 
-    hasData, 
-    loading 
+  return useMemo(() => ({
+    totalLinks,
+    totalCareerPages,
+    hasData,
+    loading
   }), [totalLinks, totalCareerPages, hasData, loading]);
 };
 
@@ -41,24 +41,24 @@ export const DataProvider = ({ children }) => {
   const [dataFetched, setDataFetched] = useState(false);
   const [error, setError] = useState(null);
 
-  // Cache keys for localStorage
-  const CACHE_KEYS = {
+  // Memoize cache keys to prevent changes on every render
+  const CACHE_KEYS = useMemo(() => ({
     links: 'career_data_links',
     careerPages: 'career_data_pages',
     timestamp: 'career_data_timestamp'
-  };
+  }), []);
 
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
+  const CACHE_DURATION = useMemo(() => 5 * 60 * 1000, []); // 5 minutes cache
 
   const loadFromCache = useCallback(() => {
     try {
       const timestamp = localStorage.getItem(CACHE_KEYS.timestamp);
       const now = Date.now();
-      
+
       if (timestamp && (now - parseInt(timestamp)) < CACHE_DURATION) {
         const cachedLinks = localStorage.getItem(CACHE_KEYS.links);
         const cachedPages = localStorage.getItem(CACHE_KEYS.careerPages);
-        
+
         if (cachedLinks && cachedPages) {
           setLinks(JSON.parse(cachedLinks));
           setCareerPagesMap(JSON.parse(cachedPages));
@@ -71,7 +71,7 @@ export const DataProvider = ({ children }) => {
       console.warn('Cache loading failed:', error);
     }
     return false;
-  }, []);
+  }, [CACHE_KEYS, CACHE_DURATION]);
 
   const saveToCache = useCallback((linksData, pagesData) => {
     try {
@@ -81,24 +81,24 @@ export const DataProvider = ({ children }) => {
     } catch (error) {
       console.warn('Cache saving failed:', error);
     }
-  }, []);
+  }, [CACHE_KEYS]);
 
   const fetchData = useCallback(async () => {
     if (dataFetched) return;
-    
+
     // Try to load from cache first
     if (loadFromCache()) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       // Optimized queries with ordering for better performance
       const savedUrlsQuery = query(
         collection(db, "savedUrls"),
         orderBy("timestamp", "desc")
       );
-      
+
       const careerPagesQuery = query(
         collection(db, "careerPages"),
         orderBy("timestamp", "desc")
@@ -113,7 +113,7 @@ export const DataProvider = ({ children }) => {
       // Optimize processing with single loops and early returns
       const savedUrls = [];
       const map = {};
-      
+
       // Process savedUrls
       savedUrlsSnap.forEach((doc) => {
         const data = doc.data();
@@ -154,7 +154,7 @@ export const DataProvider = ({ children }) => {
     } catch (error) {
       console.warn('Cache clearing failed:', error);
     }
-    
+
     setDataFetched(false);
     setError(null);
     fetchData();

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { db } from '../../firebase';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './careerFinal.css';
 import Header from '../../components/Header/Header'; // Add Header import
@@ -75,16 +75,15 @@ interface CareerPreviewProps {
   careerSlug?: string;
 }
 
-const CareerFinal: React.FC<CareerPreviewProps> = ({ 
-  careerData: propCareerData, 
-  careerSlug 
+const CareerFinal: React.FC<CareerPreviewProps> = ({
+  careerData: propCareerData,
+  careerSlug
 }) => {
   const [careerData, setCareerData] = useState<CareerData | null>(propCareerData || null);
   const [loading, setLoading] = useState<boolean>(!propCareerData);
   const [error, setError] = useState<string | null>(null);
-  const [availableCareers, setAvailableCareers] = useState<Array<{id: string, title: string}>>([]);
   const [expandedAccordion, setExpandedAccordion] = useState<number | null>(null);
-  
+
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
@@ -95,27 +94,6 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
   const fromCategory = urlParams.get('from');
   const categoryDisplayName = fromCategory ? formatCategoryName(fromCategory) : null;
 
-  // Fetch available careers for dropdown
-  useEffect(() => {
-    const fetchAvailableCareers = async () => {
-      try {
-        const careerPagesSnap = await getDocs(collection(db, 'careerPages'));
-        const careers: Array<{id: string, title: string}> = [];
-        careerPagesSnap.forEach(doc => {
-          const data = doc.data();
-          careers.push({ 
-            id: doc.id, 
-            title: data.title || doc.id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-          });
-        });
-        setAvailableCareers(careers.sort((a, b) => a.title.localeCompare(b.title)));
-      } catch (err) {
-        console.error('Error fetching careers:', err);
-      }
-    };
-
-    fetchAvailableCareers();
-  }, []);
 
   // Fetch career data if not provided as prop
   useEffect(() => {
@@ -123,19 +101,19 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
       const fetchCareerData = async () => {
         setLoading(true);
         setError(null);
-        
+
         try {
           console.log("Fetching career data for:", currentSlug); // Debug log
-          
+
           // Check URL parameters to see if this is a temporary preview
           const urlParams = new URLSearchParams(window.location.search);
           const isTemp = urlParams.get('temp') === 'true';
-          
+
           if (isTemp) {
             // Fetch from temporary collection
             const tempDocRef = doc(db, 'tempPreviewPages', currentSlug);
             const tempDocSnap = await getDoc(tempDocRef);
-            
+
             if (tempDocSnap.exists()) {
               const tempData = { id: tempDocSnap.id, ...tempDocSnap.data() } as CareerData;
               console.log('Using temporary preview data:', tempData);
@@ -146,7 +124,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
               console.warn('Temporary document not found, falling back to main collection');
             }
           }
-          
+
           // Check session storage for preview data
           const previewData = sessionStorage.getItem('previewCareerData');
           if (previewData) {
@@ -161,7 +139,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
           // Fetch from Firebase main collection using the career name as document ID
           const docRef = doc(db, 'careerPages', currentSlug);
           const docSnap = await getDoc(docRef);
-          
+
           if (docSnap.exists()) {
             const data = { id: docSnap.id, ...docSnap.data() } as CareerData;
             console.log('Fetched career data:', data); // Debug log
@@ -182,18 +160,11 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
     }
   }, [currentSlug, propCareerData]);
 
-  // Handle career selection from dropdown
-  const handleCareerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = e.target.value;
-    if (selectedId) {
-      navigate(`/preview-career/${selectedId}`);
-    }
-  };
 
   // Helper functions to process the data
   const processCareerOpportunities = (opportunities: Record<string, any>): CareerOpportunity[] => {
     if (!opportunities) return [];
-    
+
     return Object.entries(opportunities).map(([key, value]) => {
       if (typeof value === 'string') {
         return {
@@ -216,7 +187,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
 
   const processCareerPaths = (howToBecome: Record<string, HowToBecomeItem>): CareerPath[] => {
     if (!howToBecome) return [];
-    
+
     return Object.entries(howToBecome).map(([pathName, pathData]) => ({
       pathName: pathName.replace(/path \d+/i, '').trim() || pathName,
       stream: pathData.stream || '',
@@ -228,15 +199,15 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
 
   const processInstitutes = (institutes: Record<string, Institute>): Institute[] => {
     if (!institutes) return [];
-    
-    return Object.values(institutes).filter(institute => 
+
+    return Object.values(institutes).filter(institute =>
       institute && typeof institute === 'object' && institute.name
     );
   };
 
   const processImportantFacts = (facts: string): string[] => {
     if (!facts) return [];
-    
+
     // Split by common delimiters and filter out empty strings
     return facts.split(/[.!?]+/)
       .map(fact => fact.trim())
@@ -264,7 +235,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
     };
 
     window.addEventListener('popstate', handlePopState);
-    
+
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
@@ -328,7 +299,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
           <nav aria-label="breadcrumb">
             <ol className="breadcrumb mb-0">
               <li className="breadcrumb-item">
-                <button 
+                <button
                   className="btn btn-link p-0 text-decoration-none border-0"
                   onClick={() => handleBreadcrumbNavigation('home')}
                   style={{ color: '#6c757d' }}
@@ -337,7 +308,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                 </button>
               </li>
               <li className="breadcrumb-item">
-                <button 
+                <button
                   className="btn btn-link p-0 text-decoration-none border-0"
                   onClick={() => handleBreadcrumbNavigation('home')}
                   style={{ color: '#6c757d' }}
@@ -347,7 +318,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
               </li>
               {fromCategory && categoryDisplayName && (
                 <li className="breadcrumb-item">
-                  <button 
+                  <button
                     className="btn btn-link p-0 text-decoration-none border-0"
                     onClick={() => handleBreadcrumbNavigation('category')}
                     style={{ color: '#6c757d' }}
@@ -361,10 +332,10 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
               </li>
             </ol>
           </nav>
-          
+
           {/* Optional: Add a back button */}
           {fromCategory && (
-            <button 
+            <button
               className="btn btn-outline-secondary btn-sm"
               onClick={() => handleBreadcrumbNavigation('category')}
             >
@@ -389,12 +360,12 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
             ) : (
               <ul className="nav flex-column nav-pills">
                 <li className="nav-item">
-                  <a 
-                    className="nav-link" 
+                  <a
+                    className="nav-link"
                     href="#summary"
                     onClick={(e) => {
                       e.preventDefault();
-                      document.getElementById('summary')?.scrollIntoView({ 
+                      document.getElementById('summary')?.scrollIntoView({
                         behavior: 'smooth',
                         block: 'start'
                       });
@@ -405,12 +376,12 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                 </li>
                 {careerOpportunities.length > 0 && (
                   <li className="nav-item">
-                    <a 
-                      className="nav-link" 
+                    <a
+                      className="nav-link"
                       href="#professional-opportunities"
                       onClick={(e) => {
                         e.preventDefault();
-                        document.getElementById('professional-opportunities')?.scrollIntoView({ 
+                        document.getElementById('professional-opportunities')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
                         });
@@ -422,12 +393,12 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                 )}
                 {careerPaths.length > 0 && (
                   <li className="nav-item">
-                    <a 
-                      className="nav-link" 
+                    <a
+                      className="nav-link"
                       href="#career-path"
                       onClick={(e) => {
                         e.preventDefault();
-                        document.getElementById('career-path')?.scrollIntoView({ 
+                        document.getElementById('career-path')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
                         });
@@ -439,12 +410,12 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                 )}
                 {importantFacts.length > 0 && (
                   <li className="nav-item">
-                    <a 
-                      className="nav-link" 
+                    <a
+                      className="nav-link"
                       href="#important-facts"
                       onClick={(e) => {
                         e.preventDefault();
-                        document.getElementById('important-facts')?.scrollIntoView({ 
+                        document.getElementById('important-facts')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
                         });
@@ -456,12 +427,12 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                 )}
                 {leadingInstitutes.length > 0 && (
                   <li className="nav-item">
-                    <a 
-                      className="nav-link" 
+                    <a
+                      className="nav-link"
                       href="#leading-institutes"
                       onClick={(e) => {
                         e.preventDefault();
-                        document.getElementById('leading-institutes')?.scrollIntoView({ 
+                        document.getElementById('leading-institutes')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
                         });
@@ -473,12 +444,12 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                 )}
                 {institutionsAbroad.length > 0 && (
                   <li className="nav-item">
-                    <a 
-                      className="nav-link" 
+                    <a
+                      className="nav-link"
                       href="#institutions-abroad"
                       onClick={(e) => {
                         e.preventDefault();
-                        document.getElementById('institutions-abroad')?.scrollIntoView({ 
+                        document.getElementById('institutions-abroad')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
                         });
@@ -490,12 +461,12 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                 )}
                 {entranceExams.length > 0 && (
                   <li className="nav-item">
-                    <a 
-                      className="nav-link" 
+                    <a
+                      className="nav-link"
                       href="#entrance-exams"
                       onClick={(e) => {
                         e.preventDefault();
-                        document.getElementById('entrance-exams')?.scrollIntoView({ 
+                        document.getElementById('entrance-exams')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
                         });
@@ -507,12 +478,12 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                 )}
                 {workDescription.length > 0 && (
                   <li className="nav-item">
-                    <a 
-                      className="nav-link" 
+                    <a
+                      className="nav-link"
                       href="#work-description"
                       onClick={(e) => {
                         e.preventDefault();
-                        document.getElementById('work-description')?.scrollIntoView({ 
+                        document.getElementById('work-description')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
                         });
@@ -524,12 +495,12 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                 )}
                 {(prosAndCons.pros.length > 0 || prosAndCons.cons.length > 0) && (
                   <li className="nav-item">
-                    <a 
-                      className="nav-link" 
+                    <a
+                      className="nav-link"
                       href="#pros-cons"
                       onClick={(e) => {
                         e.preventDefault();
-                        document.getElementById('pros-cons')?.scrollIntoView({ 
+                        document.getElementById('pros-cons')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
                         });
@@ -553,7 +524,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                   <div className="placeholder col-12 mb-3" style={{ height: '1rem' }}></div>
                   <div className="placeholder col-10 mb-3" style={{ height: '1rem' }}></div>
                   <div className="placeholder col-8 mb-4" style={{ height: '1rem' }}></div>
-                  
+
                   <div className="placeholder col-4 mb-3" style={{ height: '2rem' }}></div>
                   <div className="placeholder col-12 mb-2" style={{ height: '1rem' }}></div>
                   <div className="placeholder col-12 mb-2" style={{ height: '1rem' }}></div>
@@ -567,9 +538,9 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                   <div className="d-flex align-items-center gap-3 mb-3">
                     <h1 className="mb-0">{displayTitle}</h1>
                     {isTemporaryPreview && (
-                      <span 
+                      <span
                         className="badge bg-warning text-dark px-3 py-2"
-                        style={{ 
+                        style={{
                           fontSize: '0.8rem',
                           fontWeight: '600',
                           borderRadius: '8px',
@@ -585,9 +556,9 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                       <p>{careerData.summary || 'No summary available for this career.'}</p>
                     </div>
                     <div className="col-md-4 text-center">
-                      <img 
-                        src={displayImage} 
-                        alt={`${displayTitle} Illustration`} 
+                      <img
+                        src={displayImage}
+                        alt={`${displayTitle} Illustration`}
                         className="img-fluid"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
@@ -605,10 +576,10 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                     <div className="accordion" id="opportunitiesAccordion">
                       {careerOpportunities.map((opportunity, idx) => (
                         <div className="accordion-item" key={opportunity.title || idx}>
-                          <h2 className="accordion-header" id={`heading${idx}`}> 
-                            <button 
+                          <h2 className="accordion-header" id={`heading${idx}`}>
+                            <button
                               className={`accordion-button ${expandedAccordion === idx ? '' : 'collapsed'}`}
-                              type="button" 
+                              type="button"
                               onClick={() => setExpandedAccordion(expandedAccordion === idx ? null : idx)}
                               aria-expanded={expandedAccordion === idx}
                               aria-controls={`collapse${idx}`}
@@ -616,10 +587,10 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                               {opportunity.title}
                             </button>
                           </h2>
-                          <div 
-                            id={`collapse${idx}`} 
+                          <div
+                            id={`collapse${idx}`}
                             className={`accordion-collapse collapse ${expandedAccordion === idx ? 'show' : ''}`}
-                            aria-labelledby={`heading${idx}`} 
+                            aria-labelledby={`heading${idx}`}
                             data-bs-parent="#opportunitiesAccordion"
                           >
                             <div className="accordion-body">

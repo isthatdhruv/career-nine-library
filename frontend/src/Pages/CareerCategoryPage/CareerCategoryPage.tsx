@@ -1,4 +1,4 @@
-import React, { use, useEffect } from "react";
+import React, { useEffect } from "react";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer";
 import Section from "../../components/Section/Section.tsx";
@@ -13,8 +13,7 @@ const CareerCategoryPage = () => {
   const [careerValues, setCareerValues] = React.useState<any[]>([]);
   const [careerImages, setCareerImages] = React.useState<{ [key: string]: string }>({});
   const [imagesLoading, setImagesLoading] = React.useState(false); // Add loading state
-  const [allCategories, setAllCategories] = React.useState<string[]>([]);
-  const [categoriesLoading, setCategoriesLoading] = React.useState(true);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,7 +48,7 @@ const CareerCategoryPage = () => {
         setCareerValues([]);
       }
     };
-    
+
     if (category) {
       fetchMapping();
     }
@@ -60,6 +59,7 @@ const CareerCategoryPage = () => {
       setImagesLoading(true); // Start loading
       fetchCareerImages(careerValues);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [careerValues]);
 
   const fetchCareerImages = async (careerNames: string[]) => {
@@ -96,11 +96,7 @@ const CareerCategoryPage = () => {
     return a.localeCompare(b);
   });
 
-  const handleCategoryChange = (selectedCategory: string) => {
-    if (selectedCategory !== category) {
-      navigate(`/${selectedCategory}`);
-    }
-  };
+
   const formatCategoryName = (categorySlug: string) => {
     return categorySlug
       .replace(/-/g, ' ')
@@ -166,7 +162,7 @@ const CareerCategoryPage = () => {
             </div>
           </div> */}
         </div>
-        
+
         {/* Dark break line */}
         <div className="row mb-3">
           <div className="col-12">

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaPlus, FaMinus, FaEdit } from 'react-icons/fa';
 import { useData } from '../../contexts/DataContext';
 import { db } from '../../firebase';
-import { collection, getDocs, addDoc, doc, deleteDoc, updateDoc, query, where, writeBatch, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, deleteDoc, updateDoc, writeBatch, getDoc } from 'firebase/firestore';
 import './tablePage.css';
 
 // Type definitions
@@ -27,16 +27,11 @@ interface WorkValue {
   [key: string]: any;
 }
 
-interface WorkValueEntry {
-  key: string;
-  value: any;
-  assignedPages?: string[]; // Track which pages this work value is assigned to
-}
+
 
 const TablePage: React.FC = () => {
   const { careerPagesMap, loading: dataLoading, refreshData } = useData();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [mappings, setMappings] = useState<{ [key: string]: string[] }>({});
   const [workValues, setWorkValues] = useState<WorkValue>({});
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -57,12 +52,12 @@ const TablePage: React.FC = () => {
 
     careerPages.forEach(page => {
       let hasCategory = false;
-      
+
       // Check if page has the selected category in its categories array
       if (page.categories && page.categories.includes(selectedCategory)) {
         hasCategory = true;
       }
-      
+
       // Also check if category can be extracted from pageUrl
       if (!hasCategory && page.pageUrl) {
         try {
@@ -95,6 +90,7 @@ const TablePage: React.FC = () => {
     console.log('TablePage - Data loading status:', dataLoading);
     console.log('TablePage - Career pages map:', careerPagesMap);
     console.log('TablePage - Career pages array:', careerPages);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataLoading, careerPagesMap]); // Use careerPagesMap instead of careerPages array
 
   // Fetch categories from Firestore on component mount
@@ -103,6 +99,7 @@ const TablePage: React.FC = () => {
     if (!dataLoading && Object.keys(careerPagesMap).length > 0 && categories.length === 0) {
       fetchCategories();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataLoading, careerPagesMap, categories.length]); // Add categories.length to prevent refetching
 
   // Fetch work values from Firestore
@@ -130,10 +127,10 @@ const TablePage: React.FC = () => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      
+
       // Try to fetch from a 'categories' collection first
       const categoriesSnap = await getDocs(collection(db, 'categories'));
-      
+
       if (!categoriesSnap.empty) {
         // Use categories from Firestore collection
         const fetchedCategories: Category[] = [];
@@ -146,9 +143,9 @@ const TablePage: React.FC = () => {
         console.log('No categories collection found, extracting from career pages...');
         // Extract unique categories from career pages if no categories collection exists
         const uniqueCategories = new Set<string>();
-        
+
         console.log('Career pages available:', careerPages.length);
-        
+
         careerPages.forEach(page => {
           if (page.categories) {
             page.categories.forEach(cat => uniqueCategories.add(cat));
@@ -173,7 +170,7 @@ const TablePage: React.FC = () => {
           slug: cat,
           title: cat.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
         }));
-        
+
         console.log('Extracted categories:', extractedCategories.length, extractedCategories);
         setCategories(extractedCategories);
       }
@@ -187,11 +184,11 @@ const TablePage: React.FC = () => {
   const fetchWorkValues = async () => {
     try {
       console.log('Fetching work values from workValues/all-values...');
-      
+
       // Fetch the all-values document from workValues collection
       const workValuesDocRef = doc(db, 'workValues', 'all-values');
       const workValuesDoc = await getDoc(workValuesDocRef);
-      
+
       if (workValuesDoc.exists()) {
         const data = workValuesDoc.data();
         console.log('Work values data fetched:', data);
@@ -216,34 +213,6 @@ const TablePage: React.FC = () => {
     }
   };
 
-  // Handle adding new category
-  const handleAddCategory = async () => {
-    const title = prompt('Enter new category title:');
-    if (!title) return;
-
-    const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    
-    try {
-      const docRef = await addDoc(collection(db, 'categories'), {
-        title,
-        slug,
-        timestamp: new Date().toISOString()
-      });
-      
-      const newCategory: Category = {
-        id: docRef.id,
-        title,
-        slug,
-        timestamp: new Date().toISOString()
-      };
-      
-      setCategories(prev => [...prev, newCategory]);
-      console.log('Category added successfully:', newCategory);
-    } catch (error) {
-      console.error('Error adding category:', error);
-      alert('Failed to add category. Please try again.');
-    }
-  };
 
   // Handle removing category
   const handleRemoveCategory = async (categoryId: string) => {
@@ -298,9 +267,9 @@ const TablePage: React.FC = () => {
         // 1. Update all pages that have the old slug to use the new slug
         // 2. Update the local state
         console.log('Updating extracted category and all related pages...');
-        
+
         // Get all pages that have this category
-        const pagesToUpdate = careerPages.filter(page => 
+        const pagesToUpdate = careerPages.filter(page =>
           page.categories && page.categories.includes(oldSlug)
         );
 
@@ -309,9 +278,9 @@ const TablePage: React.FC = () => {
         // Update all pages in batch
         if (pagesToUpdate.length > 0) {
           const batch = writeBatch(db);
-          
+
           pagesToUpdate.forEach(page => {
-            const updatedCategories = page.categories!.map(cat => 
+            const updatedCategories = page.categories!.map(cat =>
               cat === oldSlug ? newSlug : cat
             );
             const pageRef = doc(db, 'careerPages', page.id);
@@ -323,8 +292,8 @@ const TablePage: React.FC = () => {
         }
 
         // Update local state
-        setCategories(prev => prev.map(cat => 
-          cat.id === categoryId 
+        setCategories(prev => prev.map(cat =>
+          cat.id === categoryId
             ? { ...cat, title: newTitle, slug: newSlug }
             : cat
         ));
@@ -334,7 +303,7 @@ const TablePage: React.FC = () => {
         console.log('Updating Firestore category and all related pages...');
 
         // Get all pages that have this category
-        const pagesToUpdate = careerPages.filter(page => 
+        const pagesToUpdate = careerPages.filter(page =>
           page.categories && page.categories.includes(oldSlug)
         );
 
@@ -353,7 +322,7 @@ const TablePage: React.FC = () => {
 
         // Update all pages that have this category
         pagesToUpdate.forEach(page => {
-          const updatedCategories = page.categories!.map(cat => 
+          const updatedCategories = page.categories!.map(cat =>
             cat === oldSlug ? newSlug : cat
           );
           const pageRef = doc(db, 'careerPages', page.id);
@@ -365,8 +334,8 @@ const TablePage: React.FC = () => {
         console.log(`Updated category and ${pagesToUpdate.length} pages`);
 
         // Update local state
-        setCategories(prev => prev.map(cat => 
-          cat.id === categoryId 
+        setCategories(prev => prev.map(cat =>
+          cat.id === categoryId
             ? { ...cat, title: newTitle, slug: newSlug }
             : cat
         ));
@@ -378,11 +347,11 @@ const TablePage: React.FC = () => {
       }
 
       alert(`Successfully updated category "${oldSlug}" to "${newSlug}" and updated all related pages!`);
-      
+
       // Refresh data to ensure UI is up to date
       refreshData();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error editing category:', error);
       alert(`Failed to edit category. Error: ${error.message || 'Unknown error'}`);
     } finally {
@@ -390,31 +359,6 @@ const TablePage: React.FC = () => {
     }
   };
 
-  // Handle adding new page
-  const handleAddPage = async () => {
-    const title = prompt('Enter new page title:');
-    if (!title) return;
-
-    const pageUrl = prompt('Enter page URL (optional):') || '';
-    const summary = prompt('Enter page summary (optional):') || '';
-    
-    try {
-      const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      const docRef = await addDoc(collection(db, 'careerPages'), {
-        title,
-        summary,
-        pageUrl,
-        timestamp: new Date().toISOString()
-      });
-      
-      console.log('Page added successfully with ID:', docRef.id);
-      // Note: The page will appear in the list when DataContext refreshes
-      alert('Page added successfully! It may take a moment to appear in the list.');
-    } catch (error) {
-      console.error('Error adding page:', error);
-      alert('Failed to add page. Please try again.');
-    }
-  };
 
   // Handle removing page
   // const handleRemovePage = async (pageId: string) => {
@@ -439,7 +383,7 @@ const TablePage: React.FC = () => {
   const handleAddCategoryToPage = async (pageId: string) => {
     console.log('Add category button clicked for page:', pageId);
     console.log('Selected category:', selectedCategory);
-    
+
     if (!selectedCategory) {
       alert('Please select a category first');
       return;
@@ -457,7 +401,7 @@ const TablePage: React.FC = () => {
       // Get current categories or initialize as empty array
       const currentCategories = page.categories || [];
       console.log('Current categories:', currentCategories);
-      
+
       // Check if category is already added
       if (currentCategories.includes(selectedCategory)) {
         alert('This page already has the selected category');
@@ -467,7 +411,7 @@ const TablePage: React.FC = () => {
       // Add the new category
       const updatedCategories = [...currentCategories, selectedCategory];
       console.log('Updated categories:', updatedCategories);
-      
+
       // Update the document in Firestore
       console.log('Attempting to update Firestore document...');
       await updateDoc(doc(db, 'careerPages', pageId), {
@@ -476,11 +420,11 @@ const TablePage: React.FC = () => {
 
       console.log(`Added category "${selectedCategory}" to page "${page.title || pageId}"`);
       alert(`Successfully added category "${selectedCategory}" to page!`);
-      
+
       // Refresh data to show changes immediately
       refreshData();
-      
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('Error adding category to page:', error);
       console.error('Error details:', {
         message: error.message,
@@ -494,7 +438,7 @@ const TablePage: React.FC = () => {
   // Handle removing category from page
   const handleRemoveCategoryFromPage = async (pageId: string, categoryToRemove: string) => {
     console.log('Remove category button clicked for page:', pageId, 'category:', categoryToRemove);
-    
+
     const page = careerPages.find(p => p.id === pageId);
     if (!page) {
       alert('Page not found');
@@ -508,7 +452,7 @@ const TablePage: React.FC = () => {
       // Get current categories
       const currentCategories = page.categories || [];
       console.log('Current categories:', currentCategories);
-      
+
       // Check if category exists
       if (!currentCategories.includes(categoryToRemove)) {
         alert('This category is not assigned to this page');
@@ -518,7 +462,7 @@ const TablePage: React.FC = () => {
       // Remove the category
       const updatedCategories = currentCategories.filter(cat => cat !== categoryToRemove);
       console.log('Updated categories:', updatedCategories);
-      
+
       // Update the document in Firestore
       console.log('Attempting to update Firestore document...');
       await updateDoc(doc(db, 'careerPages', pageId), {
@@ -527,11 +471,11 @@ const TablePage: React.FC = () => {
 
       console.log(`Removed category "${categoryToRemove}" from page "${page.title || pageId}"`);
       alert(`Successfully removed category "${categoryToRemove}" from page!`);
-      
+
       // Refresh data to show changes immediately
       refreshData();
-      
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('Error removing category from page:', error);
       console.error('Error details:', {
         message: error.message,
@@ -545,7 +489,7 @@ const TablePage: React.FC = () => {
   // Handle removing work value from page
   const handleRemoveWorkValueFromPage = async (pageId: string, workValueToRemove: string) => {
     console.log('Remove work value button clicked for page:', pageId, 'work value:', workValueToRemove);
-    
+
     const page = careerPages.find(p => p.id === pageId);
     if (!page) {
       alert('Page not found');
@@ -560,7 +504,7 @@ const TablePage: React.FC = () => {
       // Get current work values
       const currentValues = page.values || [];
       console.log('Current work values:', currentValues);
-      
+
       // Check if work value exists
       if (!currentValues.includes(workValueToRemove)) {
         alert('This work value is not assigned to this page');
@@ -568,9 +512,9 @@ const TablePage: React.FC = () => {
       }
 
       // Remove the work value
-      const updatedValues = currentValues.filter(val => val !== workValueToRemove);
+      const updatedValues = currentValues.filter((val: any) => val !== workValueToRemove);
       console.log('Updated work values:', updatedValues);
-      
+
       // Update the document in Firestore
       console.log('Attempting to update Firestore document...');
       await updateDoc(doc(db, 'careerPages', pageId), {
@@ -580,11 +524,11 @@ const TablePage: React.FC = () => {
 
       console.log(`Removed work value "${workValueToRemove}" from page "${page.title || pageId}"`);
       alert(`Successfully removed work value "${displayValue}" from page!`);
-      
+
       // Refresh data to show changes immediately
       refreshData();
-      
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('Error removing work value from page:', error);
       console.error('Error details:', {
         message: error.message,
@@ -617,7 +561,7 @@ const TablePage: React.FC = () => {
       });
 
       console.log(`Added work value: ${key} = ${JSON.stringify(parsedValue)}`);
-      
+
       // Update local state
       setWorkValues(prev => ({
         ...prev,
@@ -625,8 +569,8 @@ const TablePage: React.FC = () => {
       }));
 
       alert(`Successfully added work value "${key}"!`);
-      
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('Error adding work value:', error);
       alert(`Failed to add work value. Error: ${error.message || 'Unknown error'}`);
     }
@@ -645,7 +589,7 @@ const TablePage: React.FC = () => {
       });
 
       console.log(`Removed work value: ${key}`);
-      
+
       // Update local state
       setWorkValues(prev => {
         const updated = { ...prev };
@@ -654,8 +598,8 @@ const TablePage: React.FC = () => {
       });
 
       alert(`Successfully removed work value "${key}"!`);
-      
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('Error removing work value:', error);
       alert(`Failed to remove work value. Error: ${error.message || 'Unknown error'}`);
     }
@@ -665,26 +609,26 @@ const TablePage: React.FC = () => {
   const toggleDropdown = (workValueKey: string) => {
     setOpenDropdowns(prev => {
       const isOpening = !prev[workValueKey];
-      
+
       if (isOpening) {
         // When opening dropdown, initialize selection with pages that already have this work value
         const workValue = workValues[workValueKey];
         const actualValue = Array.isArray(workValue) ? workValue.join(', ') : String(workValue);
         const filteredPages = getFilteredPagesForCategory();
-        
+
         const pagesWithValue = filteredPages
           .filter(page => page.values && (
-            page.values.includes(actualValue) || 
+            page.values.includes(actualValue) ||
             page.values.includes(workValueKey)
           ))
           .map(page => page.id);
-        
+
         setSelectedPagesForWorkValue(prevSelection => ({
           ...prevSelection,
           [workValueKey]: pagesWithValue
         }));
       }
-      
+
       return {
         ...prev,
         [workValueKey]: isOpening
@@ -697,11 +641,11 @@ const TablePage: React.FC = () => {
     setSelectedPagesForWorkValue(prev => {
       const currentSelection = prev[workValueKey] || [];
       const isSelected = currentSelection.includes(pageId);
-      
+
       const updatedSelection = isSelected
         ? currentSelection.filter(id => id !== pageId)
         : [...currentSelection, pageId];
-      
+
       return {
         ...prev,
         [workValueKey]: updatedSelection
@@ -720,18 +664,18 @@ const TablePage: React.FC = () => {
 
     const actualValue = Array.isArray(workValue) ? workValue.join(', ') : String(workValue);
     const filteredPages = getFilteredPagesForCategory();
-    
+
     // Separate pages into those that should have the work value and those that shouldn't
     const pagesToAdd: string[] = [];
     const pagesToRemove: string[] = [];
-    
+
     filteredPages.forEach(page => {
       const hasWorkValue = page.values && (
-        page.values.includes(actualValue) || 
+        page.values.includes(actualValue) ||
         page.values.includes(workValueKey)
       );
       const isSelected = selectedPages.includes(page.id);
-      
+
       if (isSelected && !hasWorkValue) {
         // Page is selected but doesn't have the work value - add it
         pagesToAdd.push(page.id);
@@ -753,7 +697,7 @@ const TablePage: React.FC = () => {
     if (pagesToRemove.length > 0) {
       confirmMessage.push(`Remove work value from ${pagesToRemove.length} pages`);
     }
-    
+
     const confirmSave = window.confirm(
       `Save changes?\n\n${confirmMessage.join('\n')}`
     );
@@ -761,13 +705,13 @@ const TablePage: React.FC = () => {
 
     try {
       const batch = writeBatch(db);
-      
+
       // Add work value to selected pages that don't have it
       pagesToAdd.forEach(pageId => {
         const pageRef = doc(db, 'careerPages', pageId);
         const page = careerPages.find(p => p.id === pageId);
         const currentValues = page?.values || [];
-        
+
         // Add the actual value
         const updatedValues = [...currentValues, actualValue];
         batch.update(pageRef, {
@@ -775,18 +719,18 @@ const TablePage: React.FC = () => {
           lastModified: new Date().toISOString()
         });
       });
-      
+
       // Remove work value from unselected pages that have it
       pagesToRemove.forEach(pageId => {
         const pageRef = doc(db, 'careerPages', pageId);
         const page = careerPages.find(p => p.id === pageId);
         const currentValues = page?.values || [];
-        
+
         // Remove both the actual value and the old key if they exist
-        const updatedValues = currentValues.filter(val => 
+        const updatedValues = currentValues.filter((val: any) =>
           val !== actualValue && val !== workValueKey
         );
-        
+
         batch.update(pageRef, {
           values: updatedValues,
           lastModified: new Date().toISOString()
@@ -794,11 +738,11 @@ const TablePage: React.FC = () => {
       });
 
       await batch.commit();
-      
+
       const totalChanges = pagesToAdd.length + pagesToRemove.length;
       console.log(`Applied changes to ${totalChanges} pages for work value "${actualValue}"`);
       alert(`Successfully saved changes to ${totalChanges} pages!`);
-      
+
       // Clear selection and close dropdown
       setSelectedPagesForWorkValue(prev => ({
         ...prev,
@@ -808,11 +752,11 @@ const TablePage: React.FC = () => {
         ...prev,
         [workValueKey]: false
       }));
-      
+
       // Refresh data to show changes
       refreshData();
-      
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('Error saving work value changes:', error);
       alert(`Failed to save changes. Error: ${error.message || 'Unknown error'}`);
     }
@@ -828,11 +772,11 @@ const TablePage: React.FC = () => {
 
     const actualValue = Array.isArray(workValue) ? workValue.join(', ') : String(workValue);
     const filteredPages = getFilteredPagesForCategory();
-    
+
     // Find pages that have this work value (either as actual value or old key)
-    const pagesWithValue = filteredPages.filter(page => 
+    const pagesWithValue = filteredPages.filter(page =>
       page.values && (
-        page.values.includes(actualValue) || 
+        page.values.includes(actualValue) ||
         page.values.includes(workValueKey)
       )
     );
@@ -849,16 +793,16 @@ const TablePage: React.FC = () => {
 
     try {
       const batch = writeBatch(db);
-      
+
       pagesWithValue.forEach(page => {
         const pageRef = doc(db, 'careerPages', page.id);
         const currentValues = page.values || [];
-        
+
         // Remove both the actual value and the old key if they exist
-        const updatedValues = currentValues.filter(val => 
+        const updatedValues = currentValues.filter((val: any) =>
           val !== actualValue && val !== workValueKey
         );
-        
+
         batch.update(pageRef, {
           values: updatedValues,
           lastModified: new Date().toISOString()
@@ -866,14 +810,14 @@ const TablePage: React.FC = () => {
       });
 
       await batch.commit();
-      
+
       console.log(`Removed work value "${actualValue}" from ${pagesWithValue.length} pages`);
       alert(`Successfully removed work value "${actualValue}" from ${pagesWithValue.length} pages!`);
-      
+
       // Refresh data to show changes
       refreshData();
-      
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('Error removing work value from pages:', error);
       alert(`Failed to remove work value from pages. Error: ${error.message || 'Unknown error'}`);
     }
@@ -893,13 +837,13 @@ const TablePage: React.FC = () => {
   // Get filtered pages for the selected category
   const getFilteredPagesForCategory = () => {
     if (!selectedCategory) return [];
-    
+
     return careerPages.filter(page => {
       // Check if page has the selected category in its categories array
       if (page.categories && page.categories.includes(selectedCategory)) {
         return true;
       }
-      
+
       // Also check if category can be extracted from pageUrl
       if (page.pageUrl) {
         try {
@@ -911,11 +855,11 @@ const TablePage: React.FC = () => {
           return false;
         }
       }
-      
+
       return false;
     });
   };
-  
+
 
   if (dataLoading || loading) {
     return (
@@ -948,8 +892,8 @@ const TablePage: React.FC = () => {
           <div className="table-wrapper">
             <div className="table-content">
               {categories.map((category) => (
-                <div 
-                  key={category.id} 
+                <div
+                  key={category.id}
                   className={`table-row ${selectedCategory === category.slug ? 'selected' : ''}`}
                   onClick={() => handleCategorySelect(category.slug)}
                   style={{ cursor: 'pointer' }}
@@ -959,7 +903,7 @@ const TablePage: React.FC = () => {
                     <div className="row-subtitle">{category.slug}</div>
                   </div>
                   <div className="row-actions">
-                    <button 
+                    <button
                       className="edit-button"
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent triggering row click
@@ -969,7 +913,7 @@ const TablePage: React.FC = () => {
                     >
                       <FaEdit />
                     </button>
-                    <button 
+                    <button
                       className="remove-button"
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent triggering row click
@@ -1030,8 +974,8 @@ const TablePage: React.FC = () => {
                 );
 
                 return (
-                  <div 
-                    key={page.id} 
+                  <div
+                    key={page.id}
                     className={`table-row ${isMatching ? 'highlighted' : ''}`}
                   >
                     <div className="row-content">
@@ -1040,8 +984,8 @@ const TablePage: React.FC = () => {
                       {page.categories && page.categories.length > 0 && (
                         <div className="row-tags">
                           {page.categories.map((cat: string, index: number) => (
-                            <span 
-                              key={index} 
+                            <span
+                              key={index}
                               className={`tag ${cat === selectedCategory ? 'selected-tag' : ''}`}
                             >
                               {cat}
@@ -1065,18 +1009,18 @@ const TablePage: React.FC = () => {
                       {/* Show work values if any are applied */}
                       {page.values && page.values.length > 0 && (
                         <div className="row-tags" style={{ marginTop: '4px' }}>
-                          <span style={{ 
-                            fontSize: '10px', 
-                            color: '#6b7280', 
-                            marginRight: '4px' 
+                          <span style={{
+                            fontSize: '10px',
+                            color: '#6b7280',
+                            marginRight: '4px'
                           }}>
                             Work Values:
                           </span>
                           {page.values.slice(0, 3).map((value: string, index: number) => {
                             const displayValue = resolveWorkValueDisplay(value);
                             return (
-                              <span 
-                                key={index} 
+                              <span
+                                key={index}
                                 style={{
                                   background: '#e0f2fe',
                                   color: '#0369a1',
@@ -1120,9 +1064,9 @@ const TablePage: React.FC = () => {
                             );
                           })}
                           {page.values.length > 3 && (
-                            <span style={{ 
-                              fontSize: '10px', 
-                              color: '#6b7280' 
+                            <span style={{
+                              fontSize: '10px',
+                              color: '#6b7280'
                             }}>
                               +{page.values.length - 3} more
                             </span>
@@ -1133,7 +1077,7 @@ const TablePage: React.FC = () => {
                     <div className="row-actions">
                       {/* Show Add button only when a category is selected and page doesn't have that category */}
                       {selectedCategory && !isMatching && (
-                        <button 
+                        <button
                           className="add-category-button"
                           onClick={() => handleAddCategoryToPage(page.id)}
                           title={`Add "${selectedCategory}" to this page`}
@@ -1171,7 +1115,7 @@ const TablePage: React.FC = () => {
                 (Apply to: {selectedCategory} pages)
               </span>
             )}
-            <button 
+            <button
               className="add-button"
               onClick={handleAddMapping}
               title="Add New Item"
@@ -1185,20 +1129,20 @@ const TablePage: React.FC = () => {
                 const filteredPages = getFilteredPagesForCategory();
                 const selectedPages = selectedPagesForWorkValue[key] || [];
                 const isDropdownOpen = openDropdowns[key] || false;
-                
+
                 return (
                   <div key={key} className="table-row">
                     <div className="row-content">
                       <div className="row-title">{value}</div>
                       <div className="row-subtitle">
-                        {Array.isArray(value) 
-                          ? value.join(', ') 
-                          : typeof value === 'object' 
-                            ? JSON.stringify(value) 
+                        {Array.isArray(value)
+                          ? value.join(', ')
+                          : typeof value === 'object'
+                            ? JSON.stringify(value)
                             : String(value)
                         }
                       </div>
-                      
+
                       {/* Page Selection Dropdown */}
                       {selectedCategory && filteredPages.length > 0 && (
                         <div className="work-value-assignment" style={{ marginTop: '8px' }}>
@@ -1206,13 +1150,13 @@ const TablePage: React.FC = () => {
                             {(() => {
                               const workValue = workValues[key];
                               const actualValue = Array.isArray(workValue) ? workValue.join(', ') : String(workValue);
-                              const pagesWithValue = filteredPages.filter(page => 
+                              const pagesWithValue = filteredPages.filter(page =>
                                 page.values && (
                                   page.values.includes(actualValue) || // Check for actual value
                                   page.values.includes(key) // Check for old key
                                 )
                               ).length;
-                              
+
                               return (
                                 <button
                                   onClick={() => toggleDropdown(key)}
@@ -1229,12 +1173,12 @@ const TablePage: React.FC = () => {
                                     gap: '4px'
                                   }}
                                 >
-                                  Select Pages ({selectedPages.length}/{filteredPages.length}) 
+                                  Select Pages ({selectedPages.length}/{filteredPages.length})
                                   {pagesWithValue > 0 && (
-                                    <span style={{ 
-                                      fontSize: '10px', 
-                                      background: '#10b981', 
-                                      padding: '1px 4px', 
+                                    <span style={{
+                                      fontSize: '10px',
+                                      background: '#10b981',
+                                      padding: '1px 4px',
                                       borderRadius: '3px',
                                       marginLeft: '4px'
                                     }}>
@@ -1247,7 +1191,7 @@ const TablePage: React.FC = () => {
                                 </button>
                               );
                             })()}
-                            
+
                             {isDropdownOpen && (
                               <div style={{
                                 position: 'absolute',
@@ -1263,15 +1207,15 @@ const TablePage: React.FC = () => {
                                 overflowY: 'auto'
                               }}>
                                 <div style={{ padding: '8px' }}>
-                                  <div style={{ 
-                                    fontSize: '12px', 
-                                    fontWeight: '600', 
-                                    color: '#374151', 
-                                    marginBottom: '6px' 
+                                  <div style={{
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    color: '#374151',
+                                    marginBottom: '6px'
                                   }}>
                                     Select pages from {selectedCategory}:
                                   </div>
-                                  
+
                                   {filteredPages.map(page => {
                                     const workValue = workValues[key];
                                     const actualValue = Array.isArray(workValue) ? workValue.join(', ') : String(workValue);
@@ -1280,7 +1224,7 @@ const TablePage: React.FC = () => {
                                       page.values.includes(key) // Check for old key
                                     );
                                     const isSelected = selectedPages.includes(page.id);
-                                    
+
                                     return (
                                       <label
                                         key={page.id}
@@ -1298,15 +1242,15 @@ const TablePage: React.FC = () => {
                                           onChange={() => handlePageSelectionForWorkValue(key, page.id)}
                                           style={{ marginRight: '6px' }}
                                         />
-                                        <span style={{ 
+                                        <span style={{
                                           color: hasWorkValue ? '#10b981' : (isSelected ? '#10b981' : '#374151'),
                                           fontWeight: (hasWorkValue || isSelected) ? '600' : 'normal'
                                         }}>
                                           {page.title || page.id}
                                           {hasWorkValue && (
-                                            <span style={{ 
-                                              marginLeft: '6px', 
-                                              fontSize: '10px', 
+                                            <span style={{
+                                              marginLeft: '6px',
+                                              fontSize: '10px',
                                               color: '#10b981',
                                               fontWeight: '600'
                                             }}>
@@ -1317,10 +1261,10 @@ const TablePage: React.FC = () => {
                                       </label>
                                     );
                                   })}
-                                  
-                                  <div style={{ 
-                                    borderTop: '1px solid #e5e7eb', 
-                                    marginTop: '6px', 
+
+                                  <div style={{
+                                    borderTop: '1px solid #e5e7eb',
+                                    marginTop: '6px',
                                     paddingTop: '6px',
                                     display: 'flex',
                                     gap: '6px',
@@ -1365,13 +1309,13 @@ const TablePage: React.FC = () => {
                                     {(() => {
                                       const workValue = workValues[key];
                                       const actualValue = Array.isArray(workValue) ? workValue.join(', ') : String(workValue);
-                                      const pagesWithValue = filteredPages.filter(page => 
+                                      const pagesWithValue = filteredPages.filter(page =>
                                         page.values && (
-                                          page.values.includes(actualValue) || 
+                                          page.values.includes(actualValue) ||
                                           page.values.includes(key)
                                         )
                                       ).length;
-                                      
+
                                       if (pagesWithValue > 0) {
                                         return (
                                           <button
@@ -1400,11 +1344,11 @@ const TablePage: React.FC = () => {
                           </div>
                         </div>
                       )}
-                      
+
                       {!selectedCategory && (
-                        <div style={{ 
-                          fontSize: '12px', 
-                          color: '#6b7280', 
+                        <div style={{
+                          fontSize: '12px',
+                          color: '#6b7280',
                           marginTop: '4px',
                           fontStyle: 'italic'
                         }}>
@@ -1412,8 +1356,8 @@ const TablePage: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    
-                    <button 
+
+                    <button
                       className="remove-button"
                       onClick={() => handleRemoveMapping(key)}
                       title="Remove Item"

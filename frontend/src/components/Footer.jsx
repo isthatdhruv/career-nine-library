@@ -122,14 +122,13 @@ const Footer = () => {
           <div
             className="col-lg-6 col-md-6"
             style={{
-              background: "#081512",
+              background: "transparent",
               padding: "60px",
               borderRadius: "25px",
               minHeight: "400px",
               display: "flex",
               flexDirection: "column",
               justifyContent: "flex-start",
-              background: "transparent", 
               boxShadow: "none"
             }}
           >
