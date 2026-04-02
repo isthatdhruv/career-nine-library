@@ -8,134 +8,141 @@ const Header = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  
   return (
-    <nav
-      className="navbar navbar-expand-lg navbar-light bg-white shadow-sm"
-      style={{
-        position: 'fixed',
-        top: '18px',
-        left: '24px',
-        right: '24px',
-        zIndex: 1050,
-        borderRadius: '14px',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
-        paddingTop: '14px',
-        paddingBottom: '14px',
-        backgroundColor: 'rgba(255,255,255,0.98)'
-      }}
-    >
-      <div className="container-fluid px-3 px-lg-5" style={{ paddingTop: '4px', paddingBottom: '4px', position: 'relative' }}>
-        
-        {/* Logo Section */}
-        <Link className="navbar-brand d-flex align-items-center" to="https://career-9.com/">
-          <img
-            style={{ maxHeight: '84px', height: '84px', borderRadius: '0px', boxShadow: 'none', filter: 'none', background: 'transparent' }}
-            src="/logo.png"
-            alt="Career-9"
-            className="img-fluid"
-          />
-        </Link>
+    <>
+      <style>{`
+        .c9-nav-links {
+          gap: 20px;
+          font-family: Manrope, sans-serif;
+          font-size: 18px;
+          font-weight: 800;
+        }
+        .c9-nav-links .nav-link {
+          padding: 0 !important;
+          font-weight: 800 !important;
+          text-decoration: none;
+          outline: none;
+        }
+        .c9-logo-img {
+          max-height: 84px;
+          height: 84px;
+        }
+        .c9-login-btn {
+          padding: 14px 30px;
+          font-size: 18px;
+        }
+        @media (max-width: 991.98px) {
+          .c9-nav-links {
+            gap: 0 !important;
+            font-size: 16px;
+            text-align: center;
+            padding: 10px 0;
+          }
+          .c9-nav-links .nav-link {
+            padding: 10px 0 !important;
+            border-bottom: 1px solid #eee;
+          }
+          .c9-nav-links .nav-item:last-child .nav-link {
+            border-bottom: none;
+          }
+          .c9-logo-img {
+            max-height: 50px;
+            height: 50px;
+          }
+          .c9-login-btn {
+            padding: 10px 24px;
+            font-size: 15px;
+          }
+        }
+      `}</style>
+      <nav
+        className="navbar navbar-expand-lg navbar-light bg-white shadow-sm"
+        style={{
+          zIndex: 1050,
+          borderRadius: '14px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+          backgroundColor: 'rgba(255,255,255,0.98)',
+        }}
+      >
+        <div className="container-fluid px-2 px-lg-3">
 
-        {/* Mobile Menu Toggle */}
-        <button 
-          className="navbar-toggler border-0 shadow-none" 
-          type="button" 
-          onClick={toggleMenu}
-          aria-controls="navbarNav" 
-          aria-expanded={isMenuOpen} 
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
+          {/* Logo Section */}
+          <Link className="navbar-brand d-flex align-items-center" to="https://career-9.com/">
+            <img
+              className="img-fluid c9-logo-img"
+              style={{ borderRadius: '0px', boxShadow: 'none', filter: 'none', background: 'transparent' }}
+              src="/logo.png"
+              alt="Career-9"
+            />
+          </Link>
 
-        {/* Navigation Menu */}
-        <div className={`collapse navbar-collapse ${isMenuOpen ? 'show' : ''}`} id="navbarNav">
-          
-          {/* Center Navigation Links */}
-          <ul
-            className="navbar-nav mx-auto mb-2 mb-lg-0"
-            style={{
-              display: 'flex',
-              gap: '36px',
-              alignItems: 'center',
-              fontFamily: 'Manrope, sans-serif',
-              fontSize: '18px',
-              fontWeight: 700,
-              position: 'absolute',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 2
-            }}
+          {/* Mobile Menu Toggle */}
+          <button
+            className="navbar-toggler border-0 shadow-none"
+            type="button"
+            onClick={toggleMenu}
+            aria-controls="navbarNav"
+            aria-expanded={isMenuOpen}
+            aria-label="Toggle navigation"
           >
-            <li className="nav-item">
-              <Link className="nav-link text-dark" to="https://career-9.com/#why-career-9" style={{ padding: '0', fontWeight: 700, textDecoration: 'none', outline: 'none' }}>
-                Why Career-9?
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link text-dark" to="https://career-9.com/#our-solution" style={{ padding: '0', fontWeight: 700, textDecoration: 'none', outline: 'none' }}>
-                Our Solution
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link text-dark" to="https://career-9.com/#testimonials" style={{ padding: '0', fontWeight: 700, textDecoration: 'none', outline: 'none' }}>
-                Testimonials
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link text-dark" to="https://career-9.com/#our-team" style={{ padding: '0', fontWeight: 700, textDecoration: 'none', outline: 'none' }}>
-                Our Team
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link text-dark" to="https://career-9.com/#Blog" style={{ padding: '0', fontWeight: 700, textDecoration: 'none', outline: 'none' }}>
-                Blogs
-              </Link>
-            </li>
-          </ul>
+            <span className="navbar-toggler-icon"></span>
+          </button>
 
-          {/* Action Buttons */}
-          <div className="d-flex align-items-center ms-auto" style={{ gap: '14px' }}>
-            <a href="https://career-9.com/sign-up/" style={{ textDecoration: 'none' }}>
-              <button
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid #020101',
-                  color: '#020101',
-                  padding: '12px 24px',
-                  borderRadius: '14px',
-                  boxShadow: 'none',
-                  cursor: 'pointer',
-                  fontSize: '18px',
-                  fontWeight: 700
-                }}
-              >
-                Log In
-              </button>
-            </a>
+          {/* Navigation Menu */}
+          <div className={`collapse navbar-collapse ${isMenuOpen ? 'show' : ''}`} id="navbarNav">
 
-            <a href="https://career-9.com/sign-up/" style={{ textDecoration: 'none' }}>
+            {/* Center Navigation Links */}
+            <ul className="navbar-nav mx-auto mb-2 mb-lg-0 c9-nav-links align-items-center">
+              <li className="nav-item">
+                <Link className="nav-link text-dark fw-bold" to="https://career-9.com/#why-career-9">
+                  Why Career-9?
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link text-dark fw-bold" to="https://career-9.com/#our-solution">
+                  Our Solution
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link text-dark fw-bold" to="https://career-9.com/#testimonials">
+                  Testimonials
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link text-dark fw-bold" to="https://career-9.com/#our-team">
+                  Our Team
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link text-dark fw-bold" to="https://career-9.com/#Blog">
+                  Blogs
+                </Link>
+              </li>
+            </ul>
+
+            {/* Action Button */}
+            <div className="d-flex justify-content-center justify-content-lg-end mt-2 mt-lg-0">
+              <a href="https://career-9.com/sign-up/" style={{ textDecoration: 'none' }}>
                 <button
+                  className="c9-login-btn"
                   style={{
                     background: '#00d486',
                     border: 'none',
                     color: '#000000',
-                    padding: '14px 30px',
                     borderRadius: '18px',
                     fontWeight: 700,
                     cursor: 'pointer',
-                    fontSize: '18px'
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  Register now
+                  Login/Register
                 </button>
-            </a>
+              </a>
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 };
 

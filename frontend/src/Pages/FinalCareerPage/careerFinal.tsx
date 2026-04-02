@@ -83,6 +83,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
   const [loading, setLoading] = useState<boolean>(!propCareerData);
   const [error, setError] = useState<string | null>(null);
   const [expandedAccordion, setExpandedAccordion] = useState<number | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
@@ -293,11 +294,11 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
     <div className="container-fluid d-flex flex-column min-vh-100 p-0">
       <Header />
       {/* Add minimum height to container to prevent footer jump */}
-      <div className="container py-4 flex-grow-1 main-content-with-header" style={{ minHeight: '800px' }}>
+      <div className="container py-3 py-md-4 flex-grow-1 main-content-with-header px-2 px-md-3" style={{ minHeight: '800px' }}>
         {/* Breadcrumb & Header */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
+        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 mb-md-4 gap-2">
           <nav aria-label="breadcrumb">
-            <ol className="breadcrumb mb-0">
+            <ol className="breadcrumb mb-0 flex-wrap">
               <li className="breadcrumb-item">
                 <button
                   className="btn btn-link p-0 text-decoration-none border-0"
@@ -347,8 +348,19 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
 
         <div className="row">
           {/* Sidebar Navigation */}
-          <aside className="col-12 col-md-3 mb-4 sidebar-nav">
-            {/* Add skeleton loading for sidebar */}
+          <aside className="col-12 col-md-3 mb-3 mb-md-4 sidebar-nav">
+            {/* Mobile toggle button - only visible on mobile */}
+            <button
+              className="sidebar-toggle-btn d-md-none mb-2"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              type="button"
+            >
+              <span>Navigate Sections</span>
+              <span className={`toggle-icon ${sidebarOpen ? 'open' : ''}`}>&#9660;</span>
+            </button>
+
+            {/* Sidebar links - always visible on desktop, toggled on mobile */}
+            <div className={`${sidebarOpen ? 'd-block' : 'd-none'} d-md-block`}>
             {loading ? (
               <div className="nav flex-column nav-pills">
                 {Array.from({ length: 6 }).map((_, index) => (
@@ -365,6 +377,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                     href="#summary"
                     onClick={(e) => {
                       e.preventDefault();
+                      setSidebarOpen(false);
                       document.getElementById('summary')?.scrollIntoView({
                         behavior: 'smooth',
                         block: 'start'
@@ -381,6 +394,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                       href="#professional-opportunities"
                       onClick={(e) => {
                         e.preventDefault();
+                        setSidebarOpen(false);
                         document.getElementById('professional-opportunities')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
@@ -398,6 +412,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                       href="#career-path"
                       onClick={(e) => {
                         e.preventDefault();
+                        setSidebarOpen(false);
                         document.getElementById('career-path')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
@@ -415,6 +430,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                       href="#important-facts"
                       onClick={(e) => {
                         e.preventDefault();
+                        setSidebarOpen(false);
                         document.getElementById('important-facts')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
@@ -432,6 +448,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                       href="#leading-institutes"
                       onClick={(e) => {
                         e.preventDefault();
+                        setSidebarOpen(false);
                         document.getElementById('leading-institutes')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
@@ -449,6 +466,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                       href="#institutions-abroad"
                       onClick={(e) => {
                         e.preventDefault();
+                        setSidebarOpen(false);
                         document.getElementById('institutions-abroad')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
@@ -466,6 +484,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                       href="#entrance-exams"
                       onClick={(e) => {
                         e.preventDefault();
+                        setSidebarOpen(false);
                         document.getElementById('entrance-exams')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
@@ -483,6 +502,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                       href="#work-description"
                       onClick={(e) => {
                         e.preventDefault();
+                        setSidebarOpen(false);
                         document.getElementById('work-description')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
@@ -500,6 +520,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                       href="#pros-cons"
                       onClick={(e) => {
                         e.preventDefault();
+                        setSidebarOpen(false);
                         document.getElementById('pros-cons')?.scrollIntoView({
                           behavior: 'smooth',
                           block: 'start'
@@ -512,6 +533,7 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                 )}
               </ul>
             )}
+            </div>
           </aside>
 
           {/* Main Content */}
@@ -552,14 +574,14 @@ const CareerFinal: React.FC<CareerPreviewProps> = ({
                     )}
                   </div>
                   <div className="row align-items-center">
-                    <div className="col-md-8">
+                    <div className="col-12 col-md-8 mb-3 mb-md-0">
                       <p>{careerData.summary || 'No summary available for this career.'}</p>
                     </div>
-                    <div className="col-md-4 text-center">
+                    <div className="col-12 col-md-4 text-center">
                       <img
                         src={displayImage}
                         alt={`${displayTitle} Illustration`}
-                        className="img-fluid"
+                        className="img-fluid w-100"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.src = `https://via.placeholder.com/400x300/6366f1/FFFFFF?text=${encodeURIComponent(displayTitle)}`;
